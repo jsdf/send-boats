@@ -1,12 +1,9 @@
 // src/handlers/view.ts
-
 import { Env, UploadRecord } from '../types';
-import { FILE_MAX_ACCESS_COUNT } from './constants';
+import { generateMetaTags } from '../helpers/meta';
 
 export async function handleView(key: string, env: Env): Promise<Response> {
-	// Retrieve file metadata from D1.
 	const record: UploadRecord | null = await env.DB.prepare('SELECT * FROM uploads WHERE id = ?').bind(key).first();
-
 	if (!record) {
 		return new Response('File record not found', { status: 404 });
 	}
@@ -14,20 +11,19 @@ export async function handleView(key: string, env: Env): Promise<Response> {
 	// Query the Durable Object for the current access count.
 	const counterId = env.FILE_COUNTER.idFromName(key);
 	const counterStub = env.FILE_COUNTER.get(counterId);
-	const countResp = await counterStub.fetch(`https://dummy/?cmd=get`);
+	const countResp = await counterStub.fetch('https://dummy/?cmd=get');
 	const { count } = await countResp.json();
 
-	// Render inline media based on MIME type.
 	let mediaContent = '';
 	if (record.filetype.startsWith('image/')) {
-		mediaContent = `<img src="/download/${key}" alt="${record.filename}" style="max-width:100%; display:block; margin: 0 auto;" />`;
+		mediaContent = `<img src="/download/${key}" alt="${record.filename}" style="max-width:100%; display:block; margin:0 auto;" />`;
 	} else if (record.filetype.startsWith('video/')) {
-		mediaContent = `<video controls autoplay loop playsinline style="max-width:100%; display:block; margin: 0 auto;">
+		mediaContent = `<video controls autoplay loop playsinline style="max-width:100%; display:block; margin:0 auto;">
                       <source src="/download/${key}" type="${record.filetype}">
                       Your browser does not support the video tag.
                     </video>`;
 	} else if (record.filetype.startsWith('audio/')) {
-		mediaContent = `<audio controls style="width:100%; display:block; margin: 0 auto;">
+		mediaContent = `<audio controls style="max-width:100%; display:block; margin:0 auto;">
                       <source src="/download/${key}" type="${record.filetype}">
                       Your browser does not support the audio element.
                     </audio>`;
@@ -35,28 +31,30 @@ export async function handleView(key: string, env: Env): Promise<Response> {
 		mediaContent = `<p>This file type cannot be previewed inline.</p>`;
 	}
 
-	// Build the info box with file metadata and the access count.
+	const domain = 'https://send.boats';
+	const metaTags = generateMetaTags(record, key, domain);
+
 	const infoBox = `
     <div class="info-box">
       <h2>${record.filename}</h2>
       <p><strong>Type:</strong> ${record.filetype}</p>
       <p><strong>Uploaded At:</strong> ${record.uploaded_at}</p>
-      <p><strong>Access Count:</strong> ${count} / ${FILE_MAX_ACCESS_COUNT}</p>
+      <p><strong>Access Count:</strong> ${count} / 100</p>
       <p><a href="/download/${key}">Download File</a></p>
     </div>
   `;
 
-	// Generate the complete HTML with inline CSS.
 	const html = `
 <!DOCTYPE html>
 <html>
   <head>
     <meta charset="UTF-8">
     <title>${record.filename}</title>
+    ${metaTags}
     <style>
       /* CSS reset */
       * { margin: 0; padding: 0; box-sizing: border-box; }
-      body { font-family: Arial, sans-serif; background-color: #f9f9f9; margin: 0; padding: 0; }
+      body { font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 20px; }
       .media-container { text-align: center; }
       .media-container img,
       .media-container video,
@@ -80,11 +78,10 @@ export async function handleView(key: string, env: Env): Promise<Response> {
       ${mediaContent}
     </div>
     ${infoBox}
-    <p class="back-link"><a href="/list">Back to list</a></p>
+    <p class="back-link"><a href="${domain}/list">Back to list</a></p>
   </body>
 </html>
   `;
-
 	return new Response(html, {
 		headers: { 'Content-Type': 'text/html;charset=UTF-8' },
 	});
