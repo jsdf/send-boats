@@ -1,0 +1,6 @@
+CREATE TABLE IF NOT EXISTS uploads (
+  id TEXT PRIMARY KEY,
+  filename TEXT,
+  filetype TEXT,
+  uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

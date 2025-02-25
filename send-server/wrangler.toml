@@ -1,0 +1,26 @@
+name = "send-server"
+account_id = "c4c3d12b088564d2e568f8bb1bc8cfd0"
+workers_dev = true                                          # Set to false when using a custom domain.
+routes = [{ pattern = "send.boats", custom_domain = true }]
+compatibility_date = "2025-01-29"
+main = "src/index.ts"
+
+[[r2_buckets]]
+binding = "R2_BUCKET"
+bucket_name = "send-boats"
+
+[[d1_databases]]
+binding = "DB"                                       # This must match what you use in your code (env.DB)
+database_name = "send-boats"                         # The name of the database
+database_id = "b87bdb6d-d53b-4ba4-b869-a246e9790423"
+
+[durable_objects]
+bindings = [{ name = "FILE_COUNTER", class_name = "AccessCounter" }]
+
+[[kv_namespaces]]
+binding = "RATE_LIMIT"
+id = "36cc60cc6ee049ab8c03857ba0044766"
+
+[[migrations]]
+tag = "v1"                      # A unique migration tag
+new_classes = ["AccessCounter"]
