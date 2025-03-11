@@ -2,7 +2,7 @@
 import { Env, UploadRecord } from '../types';
 import { generateMetaTags } from '../helpers/meta';
 
-export async function handleFull(key: string, env: Env): Promise<Response> {
+export async function handleFull(request: Request, key: string, env: Env): Promise<Response> {
 	const record: UploadRecord | null = await env.DB.prepare('SELECT * FROM uploads WHERE id = ?').bind(key).first();
 	if (!record) {
 		return new Response('File record not found', { status: 404 });
@@ -11,8 +11,8 @@ export async function handleFull(key: string, env: Env): Promise<Response> {
 		return new Response('Full mode is only available for video files', { status: 400 });
 	}
 
-	const domain = 'https://send.boats';
-	const metaTags = generateMetaTags(record, key, domain);
+	// Use the request URL for generating meta tags
+	const metaTags = generateMetaTags(record, key, request.url);
 
 	// Inline script: try webkitEnterFullscreen if available.
 	const script = `

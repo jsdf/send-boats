@@ -2,7 +2,7 @@
 import { Env, UploadRecord } from '../types';
 import { generateMetaTags } from '../helpers/meta';
 
-export async function handleView(key: string, env: Env): Promise<Response> {
+export async function handleView(request: Request, key: string, env: Env): Promise<Response> {
 	const record: UploadRecord | null = await env.DB.prepare('SELECT * FROM uploads WHERE id = ?').bind(key).first();
 	if (!record) {
 		return new Response('File record not found', { status: 404 });
@@ -12,7 +12,8 @@ export async function handleView(key: string, env: Env): Promise<Response> {
 	const counterId = env.FILE_COUNTER.idFromName(key);
 	const counterStub = env.FILE_COUNTER.get(counterId);
 	const countResp = await counterStub.fetch('https://dummy/?cmd=get');
-	const { count } = await countResp.json();
+	const data = (await countResp.json()) as { count: number };
+	const count = data.count;
 
 	let mediaContent = '';
 	if (record.filetype.startsWith('image/')) {
@@ -31,8 +32,8 @@ export async function handleView(key: string, env: Env): Promise<Response> {
 		mediaContent = `<p>This file type cannot be previewed inline.</p>`;
 	}
 
-	const domain = 'https://send.boats';
-	const metaTags = generateMetaTags(record, key, domain);
+	// Use the request URL for generating meta tags
+	const metaTags = generateMetaTags(record, key, request.url);
 
 	const infoBox = `
     <div class="info-box">
@@ -78,7 +79,7 @@ export async function handleView(key: string, env: Env): Promise<Response> {
       ${mediaContent}
     </div>
     ${infoBox}
-    <p class="back-link"><a href="${domain}/list">Back to list</a></p>
+    <p class="back-link"><a href="${new URL(request.url).origin}/list">Back to list</a></p>
   </body>
 </html>
   `;

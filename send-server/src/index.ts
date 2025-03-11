@@ -6,6 +6,7 @@ import { handleDownload } from './handlers/download';
 import { handleList } from './handlers/list';
 import { handleFull } from './handlers/full';
 import { handleDelete } from './handlers/delete';
+import { handlePreview } from './handlers/preview';
 import { Env } from './types';
 import { checkBasicAuth } from './helpers/auth';
 import { checkRateLimit } from './helpers/rateLimit';
@@ -42,13 +43,16 @@ export default {
 			return await handleDelete(request, env, key);
 		} else if (method === 'GET' && pathname.startsWith('/file/')) {
 			const key = pathname.slice('/file/'.length);
-			return await handleView(key, env);
+			return await handleView(request, key, env);
 		} else if (method === 'GET' && pathname.startsWith('/download/')) {
 			const key = pathname.slice('/download/'.length);
 			return await handleDownload(key, env);
 		} else if (method === 'GET' && pathname.startsWith('/full/')) {
 			const key = pathname.slice('/full/'.length);
-			return await handleFull(key, env);
+			return await handleFull(request, key, env);
+		} else if (method === 'GET' && pathname.startsWith('/preview/')) {
+			const key = pathname.slice('/preview/'.length);
+			return await handlePreview(key, env);
 		} else {
 			return new Response('Not Found', { status: 404 });
 		}

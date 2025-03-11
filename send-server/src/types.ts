@@ -14,4 +14,5 @@ export interface UploadRecord {
 	filename: string;
 	filetype: string;
 	uploaded_at: string;
+	has_preview: boolean;
 }
