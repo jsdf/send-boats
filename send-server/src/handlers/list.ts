@@ -1,5 +1,6 @@
 // src/handlers/list.ts
 import { Env, UploadRecord } from '../types';
+import { renderTemplate } from '../helpers/template';
 
 export async function handleList(request: Request, env: Env): Promise<Response> {
 	try {
@@ -37,83 +38,12 @@ export async function handleList(request: Request, env: Env): Promise<Response> 
 		const isDirty = env.GIT_DIRTY === 'true';
 		const versionInfo = `${gitSha}${isDirty ? '-dirty' : ''}`;
 
-		const html = `
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="UTF-8">
-    <title>Uploaded Files</title>
-    <style>
-      /* CSS reset */
-      * { margin: 0; padding: 0; box-sizing: border-box; }
-      body { font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 20px; }
-      .list-container { max-width: 800px; margin: 0 auto; }
-      
-      /* File list styles */
-      .file-list { list-style: none; }
-      .file-item { 
-        margin-bottom: 15px; 
-        padding: 10px;
-        border: 1px solid #eee;
-        border-radius: 4px;
-        background-color: white;
-      }
-      .file-item.has-preview {
-        display: flex;
-        align-items: center;
-      }
-      .thumbnail {
-        margin-right: 15px;
-        flex-shrink: 0;
-      }
-      .thumbnail img {
-        width: 120px;
-        height: 68px;
-        object-fit: cover;
-        border-radius: 3px;
-        border: 1px solid #ddd;
-      }
-      .file-info {
-        flex-grow: 1;
-      }
-      .file-name {
-        font-weight: bold;
-        margin-bottom: 5px;
-      }
-      .file-actions {
-        font-size: 0.9em;
-        color: #666;
-      }
-      
-      /* General styles */
-      a { color: #007bff; text-decoration: none; }
-      a:hover { text-decoration: underline; }
-      form { display: inline; }
-      button { 
-        margin-left: 10px;
-        padding: 2px 8px;
-        background-color: #f44336;
-        color: white;
-        border: none;
-        border-radius: 3px;
-        cursor: pointer;
-      }
-      button:hover {
-        background-color: #d32f2f;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="list-container">
-      <h1>Uploaded Files</h1>
-      ${listHtml}
-      <hr/>
-      <p><a href="/upload-form">Upload a new file</a></p>
-      <p class="version-info" style="margin-top: 20px; font-size: 0.8em; color: #999;">Version: ${versionInfo}</p>
-    </div>
-  </body>
-</html>
-    `;
+		// Render the template with our data
+		const html = renderTemplate('list', {
+			FILE_LIST: listHtml,
+			VERSION_INFO: versionInfo,
+		});
+
 		return new Response(html, {
 			headers: { 'Content-Type': 'text/html;charset=UTF-8' },
 		});
