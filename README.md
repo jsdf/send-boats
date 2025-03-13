@@ -1,1 +1,1 @@
-see the code in [server/]
+see the code in [server/](server/)
