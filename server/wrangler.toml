@@ -1,7 +1,7 @@
 name = "send-server"
 account_id = "c4c3d12b088564d2e568f8bb1bc8cfd0"
-workers_dev = true                                          # Set to false when using a custom domain.
-routes = [{ pattern = "send.boats", custom_domain = true }]
+workers_dev = true
+# routes = [{ pattern = "your-domain.com", custom_domain = true }]  # Uncomment and modify for custom domain
 compatibility_date = "2025-01-29"
 main = "src/index.ts"
 

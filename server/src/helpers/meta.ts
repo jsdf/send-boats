@@ -34,7 +34,7 @@ export function generateMetaTags(record: UploadRecord, key: string, requestUrl: 
 
 	return `
     <!-- Open Graph meta tags -->
-    <meta property="og:title" content="${articlePrefix} ${mediaType} on send.boats" />
+    <meta property="og:title" content="${articlePrefix} ${mediaType} on ${new URL(origin).hostname}" />
     <meta property="og:description" content="Check out this file uploaded on ${origin}" />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="${fileUrl}" />
@@ -42,7 +42,7 @@ export function generateMetaTags(record: UploadRecord, key: string, requestUrl: 
     
     <!-- Twitter Card meta tags -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="${articlePrefix} ${mediaType} on send.boats" />
+    <meta name="twitter:title" content="${articlePrefix} ${mediaType} on ${new URL(origin).hostname}" />
     <meta name="twitter:description" content="Check out this file uploaded on ${origin}" />
     ${imageWithDimensions}
   `;
