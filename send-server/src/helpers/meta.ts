@@ -8,29 +8,42 @@ export function generateMetaTags(record: UploadRecord, key: string, requestUrl: 
 	const fileUrl = `${origin}/file/${key}`;
 	let ogImageTag = '';
 
-	// For images, use the file directly.
-	// For videos with previews, use the preview endpoint.
+	// Determine media type for title
+	let mediaType = 'file';
+	let articlePrefix = 'A';
 	if (record.filetype.startsWith('image/')) {
+		mediaType = 'image';
 		ogImageTag = `<meta property="og:image" content="${origin}/download/${key}" />`;
 	} else if (record.filetype.startsWith('video/') && record.has_preview) {
+		mediaType = 'video';
 		ogImageTag = `<meta property="og:image" content="${origin}/preview/${key}" />`;
+	} else if (record.filetype.startsWith('audio/')) {
+		mediaType = 'audio';
+		articlePrefix = 'An'; // Use "An" for audio
+		ogImageTag = `<meta property="og:image" content="${origin}/default-preview.png" />`;
 	} else {
-		// Optionally, you can provide a default preview image.
 		ogImageTag = `<meta property="og:image" content="${origin}/default-preview.png" />`;
 	}
 
+	// Add image dimensions to constrain preview size
+	// Using 1200x630 (1.9:1 aspect ratio) which is optimal for most social platforms
+	// This will constrain the preview while still showing enough of vertical videos
+	const imageWithDimensions = `${ogImageTag}
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />`;
+
 	return `
     <!-- Open Graph meta tags -->
-    <meta property="og:title" content="${record.filename}" />
+    <meta property="og:title" content="${articlePrefix} ${mediaType} on send.boats" />
     <meta property="og:description" content="Check out this file uploaded on ${origin}" />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="${fileUrl}" />
-    ${ogImageTag}
+    ${imageWithDimensions}
     
     <!-- Twitter Card meta tags -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="${record.filename}" />
+    <meta name="twitter:title" content="${articlePrefix} ${mediaType} on send.boats" />
     <meta name="twitter:description" content="Check out this file uploaded on ${origin}" />
-    ${ogImageTag}
+    ${imageWithDimensions}
   `;
 }
