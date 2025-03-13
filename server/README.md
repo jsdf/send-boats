@@ -1,4 +1,4 @@
-# Send Files - Cloudflare Workers File Sharing Service
+# send.boats - Cloudflare Workers File Sharing Service
 
 This is a file sharing service built on Cloudflare Workers, allowing you to upload, share, and manage files through a simple web interface. The service uses Cloudflare R2 for storage, D1 for database, and Durable Objects for access counting.
 
