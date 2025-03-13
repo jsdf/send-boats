@@ -32,6 +32,11 @@ export async function handleList(request: Request, env: Env): Promise<Response> 
 		}
 		listHtml += `</ul>`;
 
+		// Get version information from environment variables
+		const gitSha = env.GIT_SHA || 'development';
+		const isDirty = env.GIT_DIRTY === 'true';
+		const versionInfo = `${gitSha}${isDirty ? '-dirty' : ''}`;
+
 		const html = `
 <!DOCTYPE html>
 <html>
@@ -104,6 +109,7 @@ export async function handleList(request: Request, env: Env): Promise<Response> 
       ${listHtml}
       <hr/>
       <p><a href="/upload-form">Upload a new file</a></p>
+      <p class="version-info" style="margin-top: 20px; font-size: 0.8em; color: #999;">Version: ${versionInfo}</p>
     </div>
   </body>
 </html>

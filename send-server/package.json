@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "deploy": "wrangler deploy",
+    "deploy": "./scripts/deploy-with-version.sh",
     "dev": "wrangler dev --ip 0.0.0.0",
     "start": "npm run dev",
     "test": "vitest",

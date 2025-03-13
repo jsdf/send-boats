@@ -7,6 +7,8 @@ export interface Env {
 	RATE_LIMIT: KVNamespace; // For rate limiting and auth failure tracking
 	BASIC_AUTH_USERNAME: string;
 	BASIC_AUTH_PASSWORD: string;
+	GIT_SHA?: string; // Current git commit SHA
+	GIT_DIRTY?: string; // "true" if there are uncommitted changes
 }
 
 export interface UploadRecord {
