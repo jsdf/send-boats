@@ -133,12 +133,18 @@ class UploadViewModel: ObservableObject {
         }
     }
     
+    /// Resets all state variables to their initial values
     func reset() {
+        // Reset file selection
         selectedFileURL = nil
         selectedFileName = ""
+        
+        // Reset upload state
         uploadState = .idle
         fullViewURL = nil
         viewURL = nil
+        
+        // Reset video-related properties
         isVideo = false
         videoThumbnails = []
         selectedThumbnailIndex = 0
