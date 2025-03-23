@@ -26,11 +26,12 @@ export function generateMetaTags(record: UploadRecord, key: string, requestUrl: 
 	}
 
 	// Add image dimensions to constrain preview size
-	// Using 1200x630 (1.9:1 aspect ratio) which is optimal for most social platforms
-	// This will constrain the preview while still showing enough of vertical videos
+	// Using 1200x630 (1.91:1 aspect ratio) which is optimal for most social platforms
+	// This ensures consistent display across platforms, especially for vertical videos
 	const imageWithDimensions = `${ogImageTag}
     <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" />`;
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="${record.filename}" />`;
 
 	return `
     <!-- Open Graph meta tags -->

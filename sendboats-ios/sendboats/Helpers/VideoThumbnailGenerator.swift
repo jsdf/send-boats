@@ -61,10 +61,84 @@ class VideoThumbnailGenerator {
         
         do {
             let cgImage = try await imageGenerator.image(at: time).image
-            return UIImage(cgImage: cgImage)
+            let originalImage = UIImage(cgImage: cgImage)
+            
+            // Process the image to ensure it has the correct aspect ratio for social sharing
+            return processImageForSocialSharing(originalImage)
         } catch {
             print("Error generating thumbnail: \(error.localizedDescription)")
             return nil
+        }
+    }
+    
+    /// Processes an image to ensure it has the correct aspect ratio for social sharing
+    /// - Parameter image: The original image
+    /// - Returns: A processed image with the correct aspect ratio
+    private static func processImageForSocialSharing(_ image: UIImage) -> UIImage {
+        // Target aspect ratio for social sharing (1.91:1 is optimal for most platforms)
+        let targetAspectRatio: CGFloat = 1.91
+        
+        let originalWidth = image.size.width
+        let originalHeight = image.size.height
+        let originalAspectRatio = originalWidth / originalHeight
+        
+        // If the image is already close to the target aspect ratio, return it
+        if abs(originalAspectRatio - targetAspectRatio) < 0.1 {
+            return image
+        }
+        
+        // For vertical videos (portrait orientation)
+        if originalAspectRatio < 1.0 {
+            // Create a new context with the target aspect ratio
+            let targetWidth = originalWidth
+            let targetHeight = originalWidth / targetAspectRatio
+            
+            // Center crop the image
+            let yOffset = (originalHeight - targetHeight) / 2
+            
+            UIGraphicsBeginImageContextWithOptions(CGSize(width: targetWidth, height: targetHeight), false, 0)
+            image.draw(at: CGPoint(x: 0, y: -yOffset))
+            let croppedImage = UIGraphicsGetImageFromCurrentImageContext()
+            UIGraphicsEndImageContext()
+            
+            return croppedImage ?? image
+        } 
+        // For horizontal videos that are not wide enough
+        else if originalAspectRatio < targetAspectRatio {
+            // Create a new context with the target aspect ratio
+            let targetHeight = originalHeight
+            let targetWidth = originalHeight * targetAspectRatio
+            
+            // Create a new image with letterboxing (black bars on sides)
+            UIGraphicsBeginImageContextWithOptions(CGSize(width: targetWidth, height: targetHeight), true, 0)
+            let context = UIGraphicsGetCurrentContext()
+            context?.setFillColor(UIColor.black.cgColor)
+            context?.fill(CGRect(x: 0, y: 0, width: targetWidth, height: targetHeight))
+            
+            // Center the original image
+            let xOffset = (targetWidth - originalWidth) / 2
+            image.draw(at: CGPoint(x: xOffset, y: 0))
+            
+            let letterboxedImage = UIGraphicsGetImageFromCurrentImageContext()
+            UIGraphicsEndImageContext()
+            
+            return letterboxedImage ?? image
+        }
+        // For horizontal videos that are too wide
+        else {
+            // Create a new context with the target aspect ratio
+            let targetHeight = originalHeight
+            let targetWidth = originalHeight * targetAspectRatio
+            
+            // Center crop the image
+            let xOffset = (originalWidth - targetWidth) / 2
+            
+            UIGraphicsBeginImageContextWithOptions(CGSize(width: targetWidth, height: targetHeight), false, 0)
+            image.draw(at: CGPoint(x: -xOffset, y: 0))
+            let croppedImage = UIGraphicsGetImageFromCurrentImageContext()
+            UIGraphicsEndImageContext()
+            
+            return croppedImage ?? image
         }
     }
     
