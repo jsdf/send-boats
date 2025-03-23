@@ -7,6 +7,7 @@
 
 import SwiftUI
 import PhotosUI
+import Foundation
 
 struct ContentView: View {
     @StateObject private var viewModel = UploadViewModel()
@@ -88,6 +89,19 @@ struct ContentView: View {
                 }
                 .padding(.horizontal)
                 
+                // Configuration status
+                if viewModel.username.isEmpty || viewModel.password.isEmpty {
+                    HStack {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .foregroundColor(.orange)
+                        Text("API credentials not configured. Tap the gear icon to set up.")
+                            .font(.caption)
+                            .foregroundColor(.orange)
+                    }
+                    .padding(.horizontal)
+                    .padding(.bottom, 5)
+                }
+                
                 // Upload button
                 Button(action: {
                     Task {
@@ -107,12 +121,14 @@ struct ContentView: View {
                     }
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(viewModel.selectedFileURL == nil ? Color.gray : Color.green)
+                    .background(viewModel.selectedFileURL == nil || viewModel.username.isEmpty || viewModel.password.isEmpty ? Color.gray : Color.green)
                     .foregroundColor(.white)
                     .cornerRadius(10)
                 }
                 .disabled(viewModel.selectedFileURL == nil || 
-                          viewModel.uploadState == .uploading)
+                          viewModel.uploadState == .uploading ||
+                          viewModel.username.isEmpty ||
+                          viewModel.password.isEmpty)
                 .padding(.horizontal)
                 
                 // Status and result
@@ -187,16 +203,22 @@ struct ServerSettingsView: View {
                         .disableAutocorrection(true)
                         .keyboardType(.URL)
                     
-                    TextField("Username", text: $viewModel.username)
+                    TextField("Username (required)", text: $viewModel.username)
                         .autocapitalization(.none)
                         .disableAutocorrection(true)
                     
-                    SecureField("Password", text: $viewModel.password)
+                    SecureField("Password (required)", text: $viewModel.password)
+                }
+                
+                Section(header: Text("Information"), footer: Text("Username and password are required to upload files.")) {
+                    Text("Configure your API credentials to upload files to the server.")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
                 }
                 
                 Section {
                     Button("Save") {
-                        viewModel.setupAPIClient()
+                        viewModel.saveConfiguration()
                         dismiss()
                     }
                 }

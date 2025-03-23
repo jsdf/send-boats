@@ -31,15 +31,36 @@ enum UploadState: Equatable {
 }
 
 class UploadViewModel: ObservableObject {
-    @Published var serverURL: String = ""
-    @Published var username: String = ""
-    @Published var password: String = ""
+    @Published var serverURL: String
+    @Published var username: String
+    @Published var password: String
     @Published var selectedFileURL: URL?
     @Published var selectedFileName: String = ""
     @Published var uploadState: UploadState = .idle
     @Published var fullViewURL: URL?
     
     private var apiClient: APIClient?
+    
+    init() {
+        // Load configuration from UserDefaults
+        let configuration = ConfigurationManager.shared.loadConfiguration()
+        self.serverURL = configuration.serverURL
+        self.username = configuration.username
+        self.password = configuration.password
+        
+        // Initialize API client with loaded values
+        setupAPIClient()
+    }
+    
+    func saveConfiguration() {
+        let configuration = APIConfiguration(
+            serverURL: serverURL,
+            username: username,
+            password: password
+        )
+        ConfigurationManager.shared.saveConfiguration(configuration)
+        setupAPIClient()
+    }
     
     func setupAPIClient() {
         guard let url = URL(string: serverURL) else {

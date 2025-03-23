@@ -7,6 +7,7 @@
 
 import SwiftUI
 import PhotosUI
+import UniformTypeIdentifiers
 
 struct PhotoPicker: UIViewControllerRepresentable {
     @Binding var fileURL: URL?
