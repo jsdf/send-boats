@@ -42,7 +42,7 @@ class APIClient {
         self.password = password
     }
     
-    func uploadFile(fileURL: URL) async throws -> UploadResponse {
+    func uploadFile(fileURL: URL, previewImageData: Data? = nil) async throws -> UploadResponse {
         // Create the upload URL
         let uploadURL = baseURL.appendingPathComponent("upload")
         
@@ -81,6 +81,15 @@ class APIClient {
             body.append("\r\n".data(using: .utf8)!)
         } catch {
             throw APIError.networkError(error)
+        }
+        
+        // Add preview image data if provided and file is a video
+        if let previewData = previewImageData, fileType.starts(with: "video/") {
+            body.append("--\(boundary)\r\n".data(using: .utf8)!)
+            body.append("Content-Disposition: form-data; name=\"preview\"; filename=\"preview.jpg\"\r\n".data(using: .utf8)!)
+            body.append("Content-Type: image/jpeg\r\n\r\n".data(using: .utf8)!)
+            body.append(previewData)
+            body.append("\r\n".data(using: .utf8)!)
         }
         
         // Close the form

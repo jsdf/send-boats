@@ -102,6 +102,54 @@ struct ContentView: View {
                     .padding(.bottom, 5)
                 }
                 
+                // Video preview section
+                if viewModel.isVideo {
+                    VStack(spacing: 10) {
+                        if case .generatingPreviews = viewModel.uploadState {
+                            VStack(spacing: 5) {
+                                ProgressView()
+                                    .progressViewStyle(CircularProgressViewStyle())
+                                Text("Generating video previews...")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                            .padding()
+                        } else if !viewModel.videoThumbnails.isEmpty {
+                            Text("Select a preview image:")
+                                .font(.headline)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(.horizontal)
+                            
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 10) {
+                                    ForEach(0..<viewModel.videoThumbnails.count, id: \.self) { index in
+                                        VStack {
+                                            Image(uiImage: viewModel.videoThumbnails[index].image)
+                                                .resizable()
+                                                .aspectRatio(contentMode: .fill)
+                                                .frame(width: 160, height: 90)
+                                                .cornerRadius(8)
+                                                .overlay(
+                                                    RoundedRectangle(cornerRadius: 8)
+                                                        .stroke(index == viewModel.selectedThumbnailIndex ? Color.blue : Color.clear, lineWidth: 3)
+                                                )
+                                                .onTapGesture {
+                                                    viewModel.selectedThumbnailIndex = index
+                                                }
+                                            
+                                            Text(VideoThumbnailGenerator.formatTimestamp(viewModel.videoThumbnails[index].timestamp))
+                                                .font(.caption)
+                                                .foregroundColor(.secondary)
+                                        }
+                                    }
+                                }
+                                .padding(.horizontal)
+                            }
+                        }
+                    }
+                    .padding(.bottom, 10)
+                }
+                
                 // Upload button
                 Button(action: {
                     Task {
@@ -127,6 +175,7 @@ struct ContentView: View {
                 }
                 .disabled(viewModel.selectedFileURL == nil || 
                           viewModel.uploadState == .uploading ||
+                          viewModel.uploadState == .generatingPreviews ||
                           viewModel.username.isEmpty ||
                           viewModel.password.isEmpty)
                 .padding(.horizontal)
@@ -135,6 +184,9 @@ struct ContentView: View {
                 Group {
                     switch viewModel.uploadState {
                     case .idle:
+                        EmptyView()
+                    case .generatingPreviews:
+                        // We already show this in the video preview section
                         EmptyView()
                     case .uploading:
                         Text("Uploading...")
@@ -213,10 +265,22 @@ struct ContentView: View {
                 Spacer()
             }
             .sheet(isPresented: $showingDocumentPicker) {
-                DocumentPicker(fileURL: $viewModel.selectedFileURL, fileName: $viewModel.selectedFileName)
+                DocumentPicker(
+                    fileURL: $viewModel.selectedFileURL,
+                    fileName: $viewModel.selectedFileName,
+                    onFileSelected: {
+                        viewModel.checkFileTypeAndGenerateThumbnails()
+                    }
+                )
             }
             .sheet(isPresented: $showingPhotoPicker) {
-                PhotoPicker(fileURL: $viewModel.selectedFileURL, fileName: $viewModel.selectedFileName)
+                PhotoPicker(
+                    fileURL: $viewModel.selectedFileURL,
+                    fileName: $viewModel.selectedFileName,
+                    onFileSelected: {
+                        viewModel.checkFileTypeAndGenerateThumbnails()
+                    }
+                )
             }
             .sheet(isPresented: $showingSettings) {
                 ServerSettingsView(viewModel: viewModel)

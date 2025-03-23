@@ -12,6 +12,7 @@ import UniformTypeIdentifiers
 struct DocumentPicker: UIViewControllerRepresentable {
     @Binding var fileURL: URL?
     @Binding var fileName: String
+    var onFileSelected: (() -> Void)?
     
     func makeUIViewController(context: Context) -> UIDocumentPickerViewController {
         // Create a document picker that can select any type of file
@@ -51,6 +52,9 @@ struct DocumentPicker: UIViewControllerRepresentable {
             if didStartAccessing {
                 url.stopAccessingSecurityScopedResource()
             }
+            
+            // Call the onFileSelected callback if provided
+            parent.onFileSelected?()
         }
     }
 }

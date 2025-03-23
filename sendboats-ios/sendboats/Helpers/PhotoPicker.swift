@@ -12,6 +12,7 @@ import UniformTypeIdentifiers
 struct PhotoPicker: UIViewControllerRepresentable {
     @Binding var fileURL: URL?
     @Binding var fileName: String
+    var onFileSelected: (() -> Void)?
     
     func makeUIViewController(context: Context) -> PHPickerViewController {
         var configuration = PHPickerConfiguration()
@@ -81,6 +82,7 @@ struct PhotoPicker: UIViewControllerRepresentable {
                     // Update the file URL on the main thread
                     DispatchQueue.main.async {
                         self?.parent.fileURL = tempFileURL
+                        self?.parent.onFileSelected?()
                     }
                 } catch {
                     print("Error copying file: \(error.localizedDescription)")

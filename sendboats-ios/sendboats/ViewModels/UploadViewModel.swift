@@ -7,9 +7,11 @@
 
 import Foundation
 import SwiftUI
+import AVFoundation
 
 enum UploadState: Equatable {
     case idle
+    case generatingPreviews
     case uploading
     case success(URL)
     case error(String)
@@ -17,6 +19,8 @@ enum UploadState: Equatable {
     static func == (lhs: UploadState, rhs: UploadState) -> Bool {
         switch (lhs, rhs) {
         case (.idle, .idle):
+            return true
+        case (.generatingPreviews, .generatingPreviews):
             return true
         case (.uploading, .uploading):
             return true
@@ -39,6 +43,11 @@ class UploadViewModel: ObservableObject {
     @Published var uploadState: UploadState = .idle
     @Published var fullViewURL: URL?
     @Published var viewURL: URL?
+    
+    // Video preview properties
+    @Published var isVideo: Bool = false
+    @Published var videoThumbnails: [VideoThumbnail] = []
+    @Published var selectedThumbnailIndex: Int = 0
     
     private var apiClient: APIClient?
     
@@ -92,8 +101,11 @@ class UploadViewModel: ObservableObject {
             // Start accessing the security-scoped resource
             let didStartAccessing = fileURL.startAccessingSecurityScopedResource()
             
-            // Upload the file
-            let response = try await apiClient.uploadFile(fileURL: fileURL)
+            // Get preview image data if this is a video
+            let previewData = isVideo ? getSelectedThumbnailData() : nil
+            
+            // Upload the file with preview if available
+            let response = try await apiClient.uploadFile(fileURL: fileURL, previewImageData: previewData)
             
             // Stop accessing the security-scoped resource if needed
             if didStartAccessing {
@@ -127,6 +139,63 @@ class UploadViewModel: ObservableObject {
         uploadState = .idle
         fullViewURL = nil
         viewURL = nil
+        isVideo = false
+        videoThumbnails = []
+        selectedThumbnailIndex = 0
+    }
+    
+    /// Checks if the selected file is a video and generates thumbnails if it is
+    func checkFileTypeAndGenerateThumbnails() {
+        guard let fileURL = selectedFileURL else { return }
+        
+        // Reset video-related properties
+        isVideo = false
+        videoThumbnails = []
+        selectedThumbnailIndex = 0
+        
+        // Check if the file is a video based on UTI or file extension
+        let fileExtension = fileURL.pathExtension.lowercased()
+        let videoExtensions = ["mp4", "mov", "m4v", "avi", "mkv"]
+        
+        if videoExtensions.contains(fileExtension) {
+            isVideo = true
+            generateVideoThumbnails()
+        }
+    }
+    
+    /// Generates thumbnails for the selected video file
+    private func generateVideoThumbnails() {
+        guard let videoURL = selectedFileURL, isVideo else { return }
+        
+        // Update state to show we're generating previews
+        uploadState = .generatingPreviews
+        
+        Task {
+            do {
+                // Generate thumbnails
+                let thumbnails = try await VideoThumbnailGenerator.generateThumbnails(from: videoURL)
+                
+                await MainActor.run {
+                    self.videoThumbnails = thumbnails
+                    self.selectedThumbnailIndex = 0
+                    self.uploadState = .idle
+                }
+            } catch {
+                await MainActor.run {
+                    self.uploadState = .error("Failed to generate video previews: \(error.localizedDescription)")
+                }
+            }
+        }
+    }
+    
+    /// Gets the JPEG data for the selected thumbnail
+    func getSelectedThumbnailData() -> Data? {
+        guard isVideo && !videoThumbnails.isEmpty && selectedThumbnailIndex < videoThumbnails.count else {
+            return nil
+        }
+        
+        let selectedThumbnail = videoThumbnails[selectedThumbnailIndex]
+        return VideoThumbnailGenerator.imageToJPEGData(selectedThumbnail.image)
     }
     
     func copyURLToClipboard(_ url: URL?) {
