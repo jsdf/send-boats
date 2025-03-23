@@ -170,3 +170,71 @@ dist
 
 .dev.vars
 .wrangler/
+
+# xcode
+
+# Xcode
+*.xcworkspace
+!default.xcworkspace
+xcuserdata/
+*.xcuserstate
+*.xcodeproj/project.xcworkspace/xcuserdata
+
+# Debugging
+*.xcdebugger
+.idea/
+*.swp
+
+# Build products
+build/
+DerivedData/
+*.o
+*.LinkFileList
+*.hmap
+
+# Cache
+*.xcscmblueprint
+*.xcuserdatad
+
+# SwiftPM
+.build/
+Packages/
+.swiftpm/xcode/package.xcworkspace/
+
+# CocoaPods
+Pods/
+
+# Carthage
+Carthage/Build/
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots
+
+# Archives
+*.xcarchive
+
+# Certificates
+*.cer
+*.p12
+*.mobileprovision
+
+# Logs
+*.log
+
+# Temporary
+*.tmp
+*.DS_Store
+
+# Playgrounds
+timeline.xctimeline
+playground.xcworkspace
+
+# Xcode Previews
+*.preview-thumbnails
+
+# Bundle artifacts
+*.ipa
+*.dSYM.zip
+*.dSYM
