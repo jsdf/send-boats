@@ -10,12 +10,12 @@ import SwiftUI
 struct HeaderView: View {
     var body: some View {
         VStack {
-            Image(systemName: "paperplane.fill")
+            Image(systemName: "sailboat")
                 .imageScale(.large)
                 .font(.system(size: 60))
                 .foregroundStyle(.blue)
             
-            Text("Send Boats")
+            Text("send.boats")
                 .font(.largeTitle)
                 .fontWeight(.bold)
         }
