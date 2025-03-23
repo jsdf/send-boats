@@ -179,6 +179,7 @@ dist
 xcuserdata/
 *.xcuserstate
 *.xcodeproj/project.xcworkspace/xcuserdata
+*.xcworkspace/
 
 # Debugging
 *.xcdebugger

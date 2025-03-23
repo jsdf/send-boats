@@ -1,5 +1,23 @@
 import { Env } from '../types';
 
+/**
+ * Generates a random, URL-safe string of the specified length
+ * @param length The length of the string to generate (default: 8)
+ * @returns A random string of the specified length
+ */
+function generateShortKey(length = 8): string {
+	const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+	let result = '';
+	const randomValues = new Uint8Array(length);
+	crypto.getRandomValues(randomValues);
+
+	for (let i = 0; i < length; i++) {
+		result += chars.charAt(randomValues[i] % chars.length);
+	}
+
+	return result;
+}
+
 export async function handleUpload(request: Request, env: Env): Promise<Response> {
 	try {
 		const formData = await request.formData();
@@ -10,7 +28,7 @@ export async function handleUpload(request: Request, env: Env): Promise<Response
 			return new Response('File not found in form data', { status: 400 });
 		}
 
-		const key = crypto.randomUUID();
+		const key = generateShortKey();
 		const filename = file.name || 'unknown';
 		const filetype = file.type || 'application/octet-stream';
 		const arrayBuffer = await file.arrayBuffer();
