@@ -145,16 +145,61 @@ struct ContentView: View {
                                 .foregroundColor(.green)
                                 .fontWeight(.bold)
                             
-                            Text("Full View URL:")
-                                .font(.caption)
+                            // View URL
+                            if let viewURL = viewModel.viewURL {
+                                VStack(spacing: 5) {
+                                    Text("View URL:")
+                                        .font(.caption)
+                                    
+                                    HStack {
+                                        Text(viewURL.absoluteString)
+                                            .font(.caption)
+                                            .foregroundColor(.blue)
+                                            .lineLimit(1)
+                                            .truncationMode(.middle)
+                                        
+                                        Spacer()
+                                        
+                                        Button(action: {
+                                            viewModel.copyURLToClipboard(viewURL)
+                                        }) {
+                                            Image(systemName: "doc.on.doc")
+                                                .foregroundColor(.blue)
+                                        }
+                                    }
+                                    .padding()
+                                    .background(Color(.systemGray6))
+                                    .cornerRadius(8)
+                                }
+                            }
                             
-                            Text(url.absoluteString)
-                                .font(.caption)
-                                .foregroundColor(.blue)
-                                .padding()
-                                .background(Color(.systemGray6))
-                                .cornerRadius(8)
-                                .multilineTextAlignment(.center)
+                            // Full View URL
+                            if let fullViewURL = viewModel.fullViewURL {
+                                VStack(spacing: 5) {
+                                    Text("Full View URL:")
+                                        .font(.caption)
+                                    
+                                    HStack {
+                                        Text(fullViewURL.absoluteString)
+                                            .font(.caption)
+                                            .foregroundColor(.blue)
+                                            .lineLimit(1)
+                                            .truncationMode(.middle)
+                                        
+                                        Spacer()
+                                        
+                                        Button(action: {
+                                            viewModel.copyURLToClipboard(fullViewURL)
+                                        }) {
+                                            Image(systemName: "doc.on.doc")
+                                                .foregroundColor(.blue)
+                                        }
+                                    }
+                                    .padding()
+                                    .background(Color(.systemGray6))
+                                    .cornerRadius(8)
+                                }
+                            }
                         }
                     case .error(let message):
                         Text("Error: \(message)")

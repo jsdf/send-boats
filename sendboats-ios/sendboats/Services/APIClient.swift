@@ -151,4 +151,8 @@ class APIClient {
     func getFullViewURL(for fileKey: String) -> URL {
         return baseURL.appendingPathComponent("full/\(fileKey)")
     }
+    
+    func getViewURL(for fileKey: String) -> URL {
+        return baseURL.appendingPathComponent("file/\(fileKey)")
+    }
 }

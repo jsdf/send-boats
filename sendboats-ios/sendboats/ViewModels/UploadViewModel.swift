@@ -38,6 +38,7 @@ class UploadViewModel: ObservableObject {
     @Published var selectedFileName: String = ""
     @Published var uploadState: UploadState = .idle
     @Published var fullViewURL: URL?
+    @Published var viewURL: URL?
     
     private var apiClient: APIClient?
     
@@ -99,12 +100,14 @@ class UploadViewModel: ObservableObject {
                 fileURL.stopAccessingSecurityScopedResource()
             }
             
-            // Get the full view URL
+            // Get the URLs
             let fullURL = apiClient.getFullViewURL(for: response.key)
+            let viewURL = apiClient.getViewURL(for: response.key)
             
             // Update state to success
             await MainActor.run {
                 self.fullViewURL = fullURL
+                self.viewURL = viewURL
                 uploadState = .success(fullURL)
             }
         } catch let error as APIError {
@@ -123,5 +126,11 @@ class UploadViewModel: ObservableObject {
         selectedFileName = ""
         uploadState = .idle
         fullViewURL = nil
+        viewURL = nil
+    }
+    
+    func copyURLToClipboard(_ url: URL?) {
+        guard let url = url else { return }
+        UIPasteboard.general.string = url.absoluteString
     }
 }
