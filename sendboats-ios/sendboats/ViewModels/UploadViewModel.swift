@@ -67,6 +67,7 @@ class UploadViewModel: ObservableObject {
     @Published var selectedFileURL: URL?
     @Published var selectedFileName: String = ""
     @Published var uploadState: UploadState = .idle
+    @Published var uploadProgress: Double = 0.0
     @Published var fullViewURL: URL?
     @Published var viewURL: URL?
     
@@ -118,8 +119,9 @@ class UploadViewModel: ObservableObject {
             return
         }
         
-        // Update state to uploading
+        // Reset progress and update state to uploading
         await MainActor.run {
+            uploadProgress = 0.0
             uploadState = .uploading
         }
         
@@ -130,8 +132,17 @@ class UploadViewModel: ObservableObject {
             // Get preview image data if this is a video
             let previewData = isVideo ? getSelectedThumbnailData() : nil
             
-            // Upload the file with preview if available
-            let response = try await apiClient.uploadFile(fileURL: fileURL, previewImageData: previewData)
+            // Upload the file with preview if available and track progress
+            let response = try await apiClient.uploadFile(
+                fileURL: fileURL, 
+                previewImageData: previewData,
+                progressHandler: { [weak self] progress in
+                    // Update progress on main thread
+                    Task { @MainActor in
+                        self?.uploadProgress = progress
+                    }
+                }
+            )
             
             // Stop accessing the security-scoped resource if needed
             if didStartAccessing {
@@ -183,6 +194,7 @@ class UploadViewModel: ObservableObject {
         
         // Reset upload state
         uploadState = .idle
+        uploadProgress = 0.0
         fullViewURL = nil
         viewURL = nil
         

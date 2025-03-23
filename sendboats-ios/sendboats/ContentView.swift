@@ -57,7 +57,7 @@ struct ContentView: View {
                         }
                         
                     case .uploading:
-                        UploadProgressView()
+                        UploadProgressView(viewModel: viewModel)
                         
                     case .success:
                         if case .success = viewModel.uploadState {
