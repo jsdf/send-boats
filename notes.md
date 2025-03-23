@@ -13,7 +13,7 @@ The server provides these key endpoints:
 The API uses basic authentication for protected routes and has rate limiting.
 
 ## iOS App Implementation Plan
-### Phase 1: Core Upload Functionality
+### Phase: Core Upload Functionality
 - API Client Service
     - Create a basic API client with authentication
     - Implement the upload endpoint only
@@ -29,25 +29,24 @@ The API uses basic authentication for protected routes and has rate limiting.
     - Upload the file to the server
     - Display the full view link (/full/{id}) after successful upload
 
-### Future Phases (in priority order)
-
-#### Phase 2: Sharesheet Integration
-- Implement a Share Extension
-- Handle incoming files from other apps
-- Process and upload the shared file
-- Return to the main app with the link
-
-#### Phase 3: Easy Copy-to-Clipboard
+#### Phase: Easy Copy-to-Clipboard
 - Add a copy button next to the generated link
 - Implement clipboard functionality
 - Add visual feedback when copied
 
-#### Phase 4: Video Preview Generation
+#### Phase: Video Preview Generation
 - Detect when uploading video files
 - Generate preview images from videos
 - Include preview images in the upload request
 - Show preview generation progress
 
+### Future Phases (in priority order)
+
+#### Phase: Sharesheet Integration
+- Implement a Share Extension
+- Handle incoming files from other apps
+- Process and upload the shared file
+- Return to the main app with the link
 
 ## other things to know
 - the info.plist of the ios project is generated. if changes are required to it, give a list of steps to update the xcode project config.
