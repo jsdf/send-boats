@@ -9,6 +9,14 @@ import Foundation
 import SwiftUI
 import AVFoundation
 
+// UI flow states
+enum UIFlowState {
+    case fileSelection
+    case previewAndUpload
+    case uploading
+    case success
+}
+
 enum UploadState: Equatable {
     case idle
     case generatingPreviews
@@ -35,6 +43,24 @@ enum UploadState: Equatable {
 }
 
 class UploadViewModel: ObservableObject {
+    // Computed property for UI flow state
+    var uiFlowState: UIFlowState {
+        // No file selected = file selection state
+        if selectedFileURL == nil || selectedFileName.isEmpty {
+            return .fileSelection
+        }
+        
+        // Check upload state
+        switch uploadState {
+        case .uploading:
+            return .uploading
+        case .success:
+            return .success
+        case .error, .generatingPreviews, .idle:
+            return .previewAndUpload
+        }
+    }
+    
     @Published var serverURL: String
     @Published var username: String
     @Published var password: String
@@ -131,6 +157,22 @@ class UploadViewModel: ObservableObject {
                 uploadState = .error("An unknown error occurred")
             }
         }
+    }
+    
+    /// Handles the selection of a new file
+    /// - Parameters:
+    ///   - fileURL: The URL of the selected file
+    ///   - fileName: The name of the selected file
+    func handleFileSelection(fileURL: URL, fileName: String) {
+        // Reset all state first
+        reset()
+        
+        // Set new file information
+        selectedFileURL = fileURL
+        selectedFileName = fileName
+        
+        // Process the file (check type, generate thumbnails if needed)
+        checkFileTypeAndGenerateThumbnails()
     }
     
     /// Resets all state variables to their initial values

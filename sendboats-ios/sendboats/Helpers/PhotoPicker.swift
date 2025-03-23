@@ -10,9 +10,8 @@ import PhotosUI
 import UniformTypeIdentifiers
 
 struct PhotoPicker: UIViewControllerRepresentable {
-    @Binding var fileURL: URL?
-    @Binding var fileName: String
-    var onFileSelected: (() -> Void)?
+    // Completion handler that returns the selected file URL and name
+    var onFilePicked: ((URL, String) -> Void)
     
     func makeUIViewController(context: Context) -> PHPickerViewController {
         var configuration = PHPickerConfiguration()
@@ -44,6 +43,9 @@ struct PhotoPicker: UIViewControllerRepresentable {
             
             guard let result = results.first else { return }
             
+            // Variable to store the file name
+            var fileName = ""
+            
             // Get file name from the item provider
             if let assetIdentifier = result.assetIdentifier,
                let assetResults = PHAsset.fetchAssets(withLocalIdentifiers: [assetIdentifier], options: nil).firstObject {
@@ -51,17 +53,17 @@ struct PhotoPicker: UIViewControllerRepresentable {
                 // Get file name from asset
                 let resources = PHAssetResource.assetResources(for: assetResults)
                 if let resource = resources.first {
-                    parent.fileName = resource.originalFilename
+                    fileName = resource.originalFilename
                 }
             }
             
             // Load the item provider's data
-            if result.itemProvider.canLoadObject(ofClass: UIImage.self) && parent.fileName.isEmpty {
+            if result.itemProvider.canLoadObject(ofClass: UIImage.self) && fileName.isEmpty {
                 // If we couldn't get the filename but it's an image, use a default name
-                parent.fileName = "image_\(Date().timeIntervalSince1970).jpg"
-            } else if result.itemProvider.hasItemConformingToTypeIdentifier(UTType.movie.identifier) && parent.fileName.isEmpty {
+                fileName = "image_\(Date().timeIntervalSince1970).jpg"
+            } else if result.itemProvider.hasItemConformingToTypeIdentifier(UTType.movie.identifier) && fileName.isEmpty {
                 // If we couldn't get the filename but it's a video, use a default name
-                parent.fileName = "video_\(Date().timeIntervalSince1970).mov"
+                fileName = "video_\(Date().timeIntervalSince1970).mov"
             }
             
             // Get the file URL by copying to a temporary location
@@ -73,16 +75,15 @@ struct PhotoPicker: UIViewControllerRepresentable {
                 
                 // Create a temporary file URL
                 let tempDirectoryURL = FileManager.default.temporaryDirectory
-                let tempFileURL = tempDirectoryURL.appendingPathComponent(self?.parent.fileName ?? "file_\(Date().timeIntervalSince1970)")
+                let tempFileURL = tempDirectoryURL.appendingPathComponent(fileName.isEmpty ? "file_\(Date().timeIntervalSince1970)" : fileName)
                 
                 do {
                     // Copy the file to our temporary location
                     try FileManager.default.copyItem(at: url, to: tempFileURL)
                     
-                    // Update the file URL on the main thread
+                    // Call the completion handler on the main thread
                     DispatchQueue.main.async {
-                        self?.parent.fileURL = tempFileURL
-                        self?.parent.onFileSelected?()
+                        self?.parent.onFilePicked(tempFileURL, fileName)
                     }
                 } catch {
                     print("Error copying file: \(error.localizedDescription)")

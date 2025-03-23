@@ -10,9 +10,8 @@ import UIKit
 import UniformTypeIdentifiers
 
 struct DocumentPicker: UIViewControllerRepresentable {
-    @Binding var fileURL: URL?
-    @Binding var fileName: String
-    var onFileSelected: (() -> Void)?
+    // Completion handler that returns the selected file URL and name
+    var onFilePicked: ((URL, String) -> Void)
     
     func makeUIViewController(context: Context) -> UIDocumentPickerViewController {
         // Create a document picker that can select any type of file
@@ -44,17 +43,16 @@ struct DocumentPicker: UIViewControllerRepresentable {
             // Start accessing the security-scoped resource
             let didStartAccessing = url.startAccessingSecurityScopedResource()
             
-            // Set the file URL and name
-            parent.fileURL = url
-            parent.fileName = url.lastPathComponent
+            // Get the file name
+            let fileName = url.lastPathComponent
+            
+            // Call the completion handler with the selected file information
+            parent.onFilePicked(url, fileName)
             
             // Stop accessing the security-scoped resource if needed
             if didStartAccessing {
                 url.stopAccessingSecurityScopedResource()
             }
-            
-            // Call the onFileSelected callback if provided
-            parent.onFileSelected?()
         }
     }
 }
