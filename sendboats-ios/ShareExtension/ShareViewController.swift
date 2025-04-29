@@ -394,13 +394,7 @@ class ShareViewController: UIViewController {
             while responder != nil {
                 if responder?.responds(to: selector) == true {
                     print("DEBUG: ShareExtension - Found responder that can open URL")
-                    
-                    // Use the non-deprecated open method
-                    if #available(iOS 10.0, *) {
-                        UIApplication.shared.open(url, options: [:], completionHandler: nil)
-                    } else {
-                        responder?.perform(selector, with: url)
-                    }
+                    responder?.perform(selector, with: url)
                     break
                 }
                 responder = responder?.next
@@ -409,6 +403,16 @@ class ShareViewController: UIViewController {
         
         // Complete the request
         print("DEBUG: ShareExtension - Completing extension request")
-        extensionContext?.completeRequest(returningItems: nil, completionHandler: nil)
+        
+        if let url = URL(string: urlString) {
+            let outputItem = NSExtensionItem()
+            outputItem.attachments = [NSItemProvider(item: url as NSURL, typeIdentifier: kUTTypeURL as String)]
+            // JavaScript values are not directly supported in this context
+            // We'll use attachments instead to pass our data
+            
+            extensionContext?.completeRequest(returningItems: [outputItem], completionHandler: nil)
+        } else {
+            extensionContext?.completeRequest(returningItems: [], completionHandler: nil)
+        }
     }
 }
