@@ -5,7 +5,7 @@ export function generateMetaTags(record: UploadRecord, key: string, requestUrl: 
 	// Extract the origin (protocol + hostname + port) from the request URL
 	const origin = new URL(requestUrl).origin;
 
-	const fileUrl = `${origin}/file/${key}`;
+	const fileUrl = record.filetype.startsWith('video/') ? `${origin}/full/${key}` : `${origin}/file/${key}`;
 	let ogImageTag = '';
 
 	// Determine media type for title

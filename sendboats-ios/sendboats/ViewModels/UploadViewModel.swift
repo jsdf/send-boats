@@ -43,6 +43,21 @@ enum UploadState: Equatable {
 }
 
 class UploadViewModel: ObservableObject {
+    // Check for shared files when the app launches
+    init() {
+        // Load configuration from UserDefaults
+        let configuration = ConfigurationManager.shared.loadConfiguration()
+        self.serverURL = configuration.serverURL
+        self.username = configuration.username
+        self.password = configuration.password
+        
+        // Initialize API client with loaded values
+        setupAPIClient()
+        
+        // Check for shared files
+        checkForSharedFiles()
+    }
+    
     // Computed property for UI flow state
     var uiFlowState: UIFlowState {
         // No file selected = file selection state
@@ -78,15 +93,69 @@ class UploadViewModel: ObservableObject {
     
     private var apiClient: APIClient?
     
-    init() {
-        // Load configuration from UserDefaults
-        let configuration = ConfigurationManager.shared.loadConfiguration()
-        self.serverURL = configuration.serverURL
-        self.username = configuration.username
-        self.password = configuration.password
+    // Check for files shared from the Share Extension
+    func checkForSharedFiles() {
+        print("DEBUG: UploadViewModel - Checking for shared files")
         
-        // Initialize API client with loaded values
-        setupAPIClient()
+        // Access shared UserDefaults
+        let sharedDefaults = UserDefaults(suiteName: "group.jsdf.sendboats")
+        
+        // Check if there's a shared file
+        if let hasSharedFile = sharedDefaults?.bool(forKey: "HasSharedFile") {
+            print("DEBUG: UploadViewModel - HasSharedFile: \(hasSharedFile)")
+        } else {
+            print("DEBUG: UploadViewModel - HasSharedFile key not found in UserDefaults")
+        }
+        
+        if let sharedFilePath = sharedDefaults?.string(forKey: "SharedFilePath") {
+            print("DEBUG: UploadViewModel - SharedFilePath: \(sharedFilePath)")
+        } else {
+            print("DEBUG: UploadViewModel - SharedFilePath key not found in UserDefaults")
+        }
+        
+        if let sharedFileName = sharedDefaults?.string(forKey: "SharedFileName") {
+            print("DEBUG: UploadViewModel - SharedFileName: \(sharedFileName)")
+        } else {
+            print("DEBUG: UploadViewModel - SharedFileName key not found in UserDefaults")
+        }
+        
+        // Check if there's a shared file
+        if let hasSharedFile = sharedDefaults?.bool(forKey: "HasSharedFile"), hasSharedFile,
+           let sharedFilePath = sharedDefaults?.string(forKey: "SharedFilePath"),
+           let sharedFileName = sharedDefaults?.string(forKey: "SharedFileName") {
+            
+            print("DEBUG: UploadViewModel - Found shared file: \(sharedFileName) at path: \(sharedFilePath)")
+            
+            // Create a URL from the path
+            let sharedFileURL = URL(fileURLWithPath: sharedFilePath)
+            
+            // Check if the file exists
+            let fileManager = FileManager.default
+            if fileManager.fileExists(atPath: sharedFilePath) {
+                print("DEBUG: UploadViewModel - File exists at path")
+            } else {
+                print("DEBUG: UploadViewModel - WARNING: File does not exist at path: \(sharedFilePath)")
+            }
+            
+            // Handle the shared file
+            print("DEBUG: UploadViewModel - Handling file selection")
+            handleFileSelection(fileURL: sharedFileURL, fileName: sharedFileName)
+            
+            // Reset the shared file flag
+            print("DEBUG: UploadViewModel - Resetting shared file flags in UserDefaults")
+            sharedDefaults?.set(false, forKey: "HasSharedFile")
+            sharedDefaults?.removeObject(forKey: "SharedFilePath")
+            sharedDefaults?.removeObject(forKey: "SharedFileName")
+            sharedDefaults?.synchronize()
+            
+            // Automatically start the upload process
+            print("DEBUG: UploadViewModel - Starting automatic upload")
+            Task {
+                await uploadFile()
+            }
+        } else {
+            print("DEBUG: UploadViewModel - No shared file found")
+        }
     }
     
     func saveConfiguration() {
@@ -109,13 +178,31 @@ class UploadViewModel: ObservableObject {
     }
     
     func uploadFile() async {
+        print("DEBUG: UploadViewModel - Starting uploadFile")
+        
         guard let apiClient = apiClient else {
+            print("DEBUG: UploadViewModel - Error: API client not configured")
             uploadState = .error("API client not configured")
             return
         }
         
         guard let fileURL = selectedFileURL else {
+            print("DEBUG: UploadViewModel - Error: No file selected")
             uploadState = .error("No file selected")
+            return
+        }
+        
+        print("DEBUG: UploadViewModel - File URL: \(fileURL.absoluteString)")
+        
+        // Check if the file exists
+        let fileManager = FileManager.default
+        if fileManager.fileExists(atPath: fileURL.path) {
+            print("DEBUG: UploadViewModel - File exists at path")
+        } else {
+            print("DEBUG: UploadViewModel - WARNING: File does not exist at path: \(fileURL.path)")
+            await MainActor.run {
+                uploadState = .error("File does not exist at path: \(fileURL.path)")
+            }
             return
         }
         
@@ -127,12 +214,16 @@ class UploadViewModel: ObservableObject {
         
         do {
             // Start accessing the security-scoped resource
+            print("DEBUG: UploadViewModel - Starting to access security-scoped resource")
             let didStartAccessing = fileURL.startAccessingSecurityScopedResource()
+            print("DEBUG: UploadViewModel - Did start accessing: \(didStartAccessing)")
             
             // Get preview image data if this is a video
             let previewData = isVideo ? getSelectedThumbnailData() : nil
+            print("DEBUG: UploadViewModel - Is video: \(isVideo), Has preview data: \(previewData != nil)")
             
             // Upload the file with preview if available and track progress
+            print("DEBUG: UploadViewModel - Starting file upload")
             let response = try await apiClient.uploadFile(
                 fileURL: fileURL, 
                 previewImageData: previewData,
@@ -140,12 +231,16 @@ class UploadViewModel: ObservableObject {
                     // Update progress on main thread
                     Task { @MainActor in
                         self?.uploadProgress = progress
+                        print("DEBUG: UploadViewModel - Upload progress: \(progress)")
                     }
                 }
             )
             
+            print("DEBUG: UploadViewModel - Upload successful, response key: \(response.key)")
+            
             // Stop accessing the security-scoped resource if needed
             if didStartAccessing {
+                print("DEBUG: UploadViewModel - Stopping access to security-scoped resource")
                 fileURL.stopAccessingSecurityScopedResource()
             }
             
@@ -153,19 +248,25 @@ class UploadViewModel: ObservableObject {
             let fullURL = apiClient.getFullViewURL(for: response.key)
             let viewURL = apiClient.getViewURL(for: response.key)
             
+            print("DEBUG: UploadViewModel - Full URL: \(fullURL.absoluteString)")
+            print("DEBUG: UploadViewModel - View URL: \(viewURL.absoluteString)")
+            
             // Update state to success
             await MainActor.run {
                 self.fullViewURL = fullURL
                 self.viewURL = viewURL
                 uploadState = .success(fullURL)
+                print("DEBUG: UploadViewModel - State updated to success")
             }
         } catch let error as APIError {
+            print("DEBUG: UploadViewModel - API Error: \(error.localizedDescription)")
             await MainActor.run {
                 uploadState = .error(error.localizedDescription)
             }
         } catch {
+            print("DEBUG: UploadViewModel - Unknown Error: \(error.localizedDescription)")
             await MainActor.run {
-                uploadState = .error("An unknown error occurred")
+                uploadState = .error("An unknown error occurred: \(error.localizedDescription)")
             }
         }
     }
@@ -175,12 +276,17 @@ class UploadViewModel: ObservableObject {
     ///   - fileURL: The URL of the selected file
     ///   - fileName: The name of the selected file
     func handleFileSelection(fileURL: URL, fileName: String) {
+        print("DEBUG: UploadViewModel - Handling file selection: \(fileName)")
+        
         // Reset all state first
         reset()
         
         // Set new file information
         selectedFileURL = fileURL
         selectedFileName = fileName
+        
+        print("DEBUG: UploadViewModel - File URL set to: \(fileURL.absoluteString)")
+        print("DEBUG: UploadViewModel - File name set to: \(fileName)")
         
         // Process the file (check type, generate thumbnails if needed)
         checkFileTypeAndGenerateThumbnails()

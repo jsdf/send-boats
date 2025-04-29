@@ -14,7 +14,7 @@ import class sendboats.UploadViewModel
 
 // MARK: - Main Content View
 struct ContentView: View {
-    @StateObject private var viewModel = UploadViewModel()
+    @EnvironmentObject var viewModel: UploadViewModel
     @State private var showingDocumentPicker = false
     @State private var showingPhotoPicker = false
     @State private var showingSettings = false
@@ -106,4 +106,5 @@ struct ContentView: View {
 // MARK: - Preview
 #Preview {
     ContentView()
+        .environmentObject(UploadViewModel())
 }

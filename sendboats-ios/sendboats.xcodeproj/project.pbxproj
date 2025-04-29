@@ -6,7 +6,18 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		739A22A92DC05A9900D4771C /* ShareExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 739A229F2DC05A9900D4771C /* ShareExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
+		739A22A72DC05A9900D4771C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 739B28D92D8F07D100B0A6F2 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 739A229E2DC05A9900D4771C;
+			remoteInfo = ShareExtension;
+		};
 		739B28F22D8F07D200B0A6F2 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 739B28D92D8F07D100B0A6F2 /* Project object */;
@@ -23,7 +34,22 @@
 		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		739A22AE2DC05A9900D4771C /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				739A22A92DC05A9900D4771C /* ShareExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		739A229F2DC05A9900D4771C /* ShareExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ShareExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		739B28E12D8F07D100B0A6F2 /* sendboats.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = sendboats.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		739B28F12D8F07D200B0A6F2 /* sendboatsTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = sendboatsTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		739B28FB2D8F07D200B0A6F2 /* sendboatsUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = sendboatsUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -37,9 +63,24 @@
 			);
 			target = 739B28E02D8F07D100B0A6F2 /* sendboats */;
 		};
+		739A22AD2DC05A9900D4771C /* Exceptions for "ShareExtension" folder in "ShareExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 739A229E2DC05A9900D4771C /* ShareExtension */;
+		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		739A22A02DC05A9900D4771C /* ShareExtension */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				739A22AD2DC05A9900D4771C /* Exceptions for "ShareExtension" folder in "ShareExtension" target */,
+			);
+			path = ShareExtension;
+			sourceTree = "<group>";
+		};
 		739B28E32D8F07D100B0A6F2 /* sendboats */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
@@ -61,6 +102,13 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		739A229C2DC05A9900D4771C /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		739B28DE2D8F07D100B0A6F2 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -91,6 +139,7 @@
 				739B28E32D8F07D100B0A6F2 /* sendboats */,
 				739B28F42D8F07D200B0A6F2 /* sendboatsTests */,
 				739B28FE2D8F07D200B0A6F2 /* sendboatsUITests */,
+				739A22A02DC05A9900D4771C /* ShareExtension */,
 				739B28E22D8F07D100B0A6F2 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -101,6 +150,7 @@
 				739B28E12D8F07D100B0A6F2 /* sendboats.app */,
 				739B28F12D8F07D200B0A6F2 /* sendboatsTests.xctest */,
 				739B28FB2D8F07D200B0A6F2 /* sendboatsUITests.xctest */,
+				739A229F2DC05A9900D4771C /* ShareExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -108,6 +158,28 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		739A229E2DC05A9900D4771C /* ShareExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 739A22AA2DC05A9900D4771C /* Build configuration list for PBXNativeTarget "ShareExtension" */;
+			buildPhases = (
+				739A229B2DC05A9900D4771C /* Sources */,
+				739A229C2DC05A9900D4771C /* Frameworks */,
+				739A229D2DC05A9900D4771C /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				739A22A02DC05A9900D4771C /* ShareExtension */,
+			);
+			name = ShareExtension;
+			packageProductDependencies = (
+			);
+			productName = ShareExtension;
+			productReference = 739A229F2DC05A9900D4771C /* ShareExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		739B28E02D8F07D100B0A6F2 /* sendboats */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 739B29052D8F07D200B0A6F2 /* Build configuration list for PBXNativeTarget "sendboats" */;
@@ -115,10 +187,12 @@
 				739B28DD2D8F07D100B0A6F2 /* Sources */,
 				739B28DE2D8F07D100B0A6F2 /* Frameworks */,
 				739B28DF2D8F07D100B0A6F2 /* Resources */,
+				739A22AE2DC05A9900D4771C /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				739A22A82DC05A9900D4771C /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				739B28E32D8F07D100B0A6F2 /* sendboats */,
@@ -183,9 +257,12 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1620;
+				LastSwiftUpdateCheck = 1630;
 				LastUpgradeCheck = 1620;
 				TargetAttributes = {
+					739A229E2DC05A9900D4771C = {
+						CreatedOnToolsVersion = 16.3;
+					};
 					739B28E02D8F07D100B0A6F2 = {
 						CreatedOnToolsVersion = 16.2;
 					};
@@ -216,11 +293,19 @@
 				739B28E02D8F07D100B0A6F2 /* sendboats */,
 				739B28F02D8F07D200B0A6F2 /* sendboatsTests */,
 				739B28FA2D8F07D200B0A6F2 /* sendboatsUITests */,
+				739A229E2DC05A9900D4771C /* ShareExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		739A229D2DC05A9900D4771C /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		739B28DF2D8F07D100B0A6F2 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -245,6 +330,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		739A229B2DC05A9900D4771C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		739B28DD2D8F07D100B0A6F2 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -269,6 +361,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		739A22A82DC05A9900D4771C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 739A229E2DC05A9900D4771C /* ShareExtension */;
+			targetProxy = 739A22A72DC05A9900D4771C /* PBXContainerItemProxy */;
+		};
 		739B28F32D8F07D200B0A6F2 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 739B28E02D8F07D100B0A6F2 /* sendboats */;
@@ -282,6 +379,60 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		739A22AB2DC05A9900D4771C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = ShareExtension/ShareExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 9W54YB5T38;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ShareExtension/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = ShareExtension;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = jsdf.sendboats.ShareExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		739A22AC2DC05A9900D4771C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = ShareExtension/ShareExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 9W54YB5T38;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ShareExtension/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = ShareExtension;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = jsdf.sendboats.ShareExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		739B29032D8F07D200B0A6F2 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -334,7 +485,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -391,7 +542,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
@@ -406,6 +557,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = sendboats/sendboats.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"sendboats/Preview Content\"";
@@ -439,6 +591,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = sendboats/sendboats.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"sendboats/Preview Content\"";
@@ -542,6 +695,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		739A22AA2DC05A9900D4771C /* Build configuration list for PBXNativeTarget "ShareExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				739A22AB2DC05A9900D4771C /* Debug */,
+				739A22AC2DC05A9900D4771C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		739B28DC2D8F07D100B0A6F2 /* Build configuration list for PBXProject "sendboats" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
