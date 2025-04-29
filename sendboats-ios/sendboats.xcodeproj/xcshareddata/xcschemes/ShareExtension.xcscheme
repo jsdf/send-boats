@@ -59,8 +59,8 @@
       launchAutomaticallySubstyle = "2">
       <RemoteRunnable
          runnableDebuggingMode = "0"
-         BundleIdentifier = "jsdf.sendboats"
-         RemotePath = "/var/containers/Bundle/Application/A8DE3D85-10CB-4D5A-B949-A6DAF7BF1730/sendboats.app">
+         BundleIdentifier = "com.apple.mobileslideshow"
+         RemotePath = "/var/containers/Bundle/Application/E63A5368-6D7E-4DE0-9C26-96876A777B81/Photos.app">
       </RemoteRunnable>
       <MacroExpansion>
          <BuildableReference

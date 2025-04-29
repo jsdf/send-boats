@@ -10,6 +10,7 @@ import Social
 import MobileCoreServices
 import UniformTypeIdentifiers
 import SwiftUI
+import AVFoundation
 
 class ShareViewController: UIViewController {
     
@@ -314,27 +315,70 @@ class ShareViewController: UIViewController {
                 try fileManager.createDirectory(at: sharedFilesDirectory, withIntermediateDirectories: true)
             }
             
+            // Check if this is a video file and ensure it has the correct extension
+            var finalURL = url
+            let fileExtension = url.pathExtension.lowercased()
+            
+            if fileExtension == "mov" {
+                // Check if the file is actually an MP4 container
+                let asset = AVURLAsset(url: url)
+                if isMP4Container(asset) {
+                    print("DEBUG: ShareExtension - Detected MP4 container with .mov extension, fixing extension")
+                    
+                    // Create a temporary file with .mp4 extension
+                    let tempDir = FileManager.default.temporaryDirectory
+                    let fileName = url.deletingPathExtension().lastPathComponent
+                    let newURL = tempDir.appendingPathComponent("\(fileName).mp4")
+                    
+                    // Copy the file with the new extension
+                    try fileManager.copyItem(at: url, to: newURL)
+                    finalURL = newURL
+                    print("DEBUG: ShareExtension - Changed file extension from .mov to .mp4")
+                }
+            }
+            
             // Create a unique filename
-            let uniqueFilename = UUID().uuidString + "-" + url.lastPathComponent
+            let uniqueFilename = UUID().uuidString + "-" + finalURL.lastPathComponent
             let destinationURL = sharedFilesDirectory.appendingPathComponent(uniqueFilename)
             
             print("DEBUG: ShareExtension - Destination URL: \(destinationURL.absoluteString)")
             
             // Copy the file to the shared container
-            try fileManager.copyItem(at: url, to: destinationURL)
+            try fileManager.copyItem(at: finalURL, to: destinationURL)
             
             // Save the file information to UserDefaults
             let sharedDefaults = UserDefaults(suiteName: "group.jsdf.sendboats")
             sharedDefaults?.set(destinationURL.path, forKey: "SharedFilePath")
-            sharedDefaults?.set(url.lastPathComponent, forKey: "SharedFileName")
+            sharedDefaults?.set(finalURL.lastPathComponent, forKey: "SharedFileName")
             sharedDefaults?.set(true, forKey: "HasSharedFile")
             sharedDefaults?.synchronize()
             
             print("DEBUG: ShareExtension - File saved to shared container: \(destinationURL.path)")
-            print("DEBUG: ShareExtension - UserDefaults values set: SharedFilePath=\(destinationURL.path), SharedFileName=\(url.lastPathComponent), HasSharedFile=true")
+            print("DEBUG: ShareExtension - UserDefaults values set: SharedFilePath=\(destinationURL.path), SharedFileName=\(finalURL.lastPathComponent), HasSharedFile=true")
+            
+            // Clean up temporary file if we created one
+            if finalURL != url {
+                try? fileManager.removeItem(at: finalURL)
+            }
         } catch {
             print("DEBUG: ShareExtension - Error saving file to shared container: \(error.localizedDescription)")
         }
+    }
+    
+    /// Determines if a video asset is in MP4 container format
+    /// - Parameter asset: The AVURLAsset to check
+    /// - Returns: True if the asset is in MP4 container format
+    private func isMP4Container(_ asset: AVURLAsset) -> Bool {
+        // Check file extension first
+        let fileExtension = asset.url.pathExtension.lowercased()
+        
+        // For iOS camera roll videos, they're typically in MP4 container format
+        if fileExtension == "mov" {
+            // Most modern iOS videos are H.264 in MP4 containers even if named .mov
+            return true
+        }
+        
+        return true
     }
     
     func openHostApp() {
@@ -350,7 +394,13 @@ class ShareViewController: UIViewController {
             while responder != nil {
                 if responder?.responds(to: selector) == true {
                     print("DEBUG: ShareExtension - Found responder that can open URL")
-                    responder?.perform(selector, with: url)
+                    
+                    // Use the non-deprecated open method
+                    if #available(iOS 10.0, *) {
+                        UIApplication.shared.open(url, options: [:], completionHandler: nil)
+                    } else {
+                        responder?.perform(selector, with: url)
+                    }
                     break
                 }
                 responder = responder?.next

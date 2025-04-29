@@ -182,7 +182,9 @@ class APIClient: NSObject {
         case "mp4":
             return "video/mp4"
         case "mov":
-            return "video/quicktime"
+            // For .mov files from iOS camera roll, they're typically in MP4 container format
+            // So we'll use video/mp4 instead of video/quicktime for better browser compatibility
+            return "video/mp4"
         case "txt":
             return "text/plain"
         default:

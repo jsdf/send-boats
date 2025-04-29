@@ -8,6 +8,7 @@
 import SwiftUI
 import PhotosUI
 import UniformTypeIdentifiers
+import AVFoundation
 
 struct PhotoPicker: UIViewControllerRepresentable {
     // Completion handler that returns the selected file URL and name
@@ -62,8 +63,8 @@ struct PhotoPicker: UIViewControllerRepresentable {
                 // If we couldn't get the filename but it's an image, use a default name
                 fileName = "image_\(Date().timeIntervalSince1970).jpg"
             } else if result.itemProvider.hasItemConformingToTypeIdentifier(UTType.movie.identifier) && fileName.isEmpty {
-                // If we couldn't get the filename but it's a video, use a default name
-                fileName = "video_\(Date().timeIntervalSince1970).mov"
+                // If we couldn't get the filename but it's a video, use a default name with mp4 extension
+                fileName = "video_\(Date().timeIntervalSince1970).mp4"
             }
             
             // Get the file URL by copying to a temporary location
@@ -73,9 +74,27 @@ struct PhotoPicker: UIViewControllerRepresentable {
                     return
                 }
                 
+                // For video files, ensure we're using the correct extension based on the container format
+                var finalFileName = fileName
+                if result.itemProvider.hasItemConformingToTypeIdentifier(UTType.movie.identifier) {
+                    // Check if the file is actually an MP4
+                    let asset = AVURLAsset(url: url)
+                    let fileFormat = self?.determineVideoFormat(asset)
+                    
+                    // If the file is an MP4 but has a .mov extension, fix it
+                    if fileFormat == "mp4" && finalFileName.lowercased().hasSuffix(".mov") {
+                        finalFileName = finalFileName.replacingOccurrences(of: ".mov", with: ".mp4", options: [.caseInsensitive, .anchored])
+                        print("Corrected video file extension from .mov to .mp4")
+                    } else if fileFormat == "mp4" && !finalFileName.lowercased().hasSuffix(".mp4") {
+                        // If it doesn't have any extension, add .mp4
+                        finalFileName = finalFileName + ".mp4"
+                        print("Added .mp4 extension to video file")
+                    }
+                }
+                
                 // Create a temporary file URL
                 let tempDirectoryURL = FileManager.default.temporaryDirectory
-                let tempFileURL = tempDirectoryURL.appendingPathComponent(fileName.isEmpty ? "file_\(Date().timeIntervalSince1970)" : fileName)
+                let tempFileURL = tempDirectoryURL.appendingPathComponent(finalFileName.isEmpty ? "file_\(Date().timeIntervalSince1970)" : finalFileName)
                 
                 do {
                     // Copy the file to our temporary location
@@ -83,12 +102,31 @@ struct PhotoPicker: UIViewControllerRepresentable {
                     
                     // Call the completion handler on the main thread
                     DispatchQueue.main.async {
-                        self?.parent.onFilePicked(tempFileURL, fileName)
+                        self?.parent.onFilePicked(tempFileURL, finalFileName)
                     }
                 } catch {
                     print("Error copying file: \(error.localizedDescription)")
                 }
             }
+        }
+        
+        /// Determines the actual container format of a video file
+        /// - Parameter asset: The AVURLAsset to check
+        /// - Returns: String indicating the format ("mp4", "mov", or "unknown")
+        private func determineVideoFormat(_ asset: AVURLAsset) -> String {
+            // Check file extension first
+            let fileExtension = asset.url.pathExtension.lowercased()
+            
+            // For iOS camera roll videos, they're typically in MP4 container format
+            if fileExtension == "mov" {
+                // Most modern iOS videos are H.264 in MP4 containers even if named .mov
+                return "mp4"
+            } else if fileExtension == "mp4" {
+                return "mp4"
+            }
+            
+            // Default to the file extension or unknown
+            return fileExtension.isEmpty ? "unknown" : fileExtension
         }
     }
 }
