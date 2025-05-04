@@ -40,8 +40,6 @@ The API uses basic authentication for protected routes and has rate limiting.
 - Include preview images in the upload request
 - Show preview generation progress
 
-### Future Phases (in priority order)
-
 #### Phase: Sharesheet Integration
 - Implement a Share Extension
 - Handle incoming files from other apps
@@ -50,3 +48,4 @@ The API uses basic authentication for protected routes and has rate limiting.
 
 ## other things to know
 - the info.plist of the ios project is generated. if changes are required to it, give a list of steps to update the xcode project config.
+- for ios builds you can check for build errors in sendboats-ios/build/logs/issues-{sendboats,ShareExtension}.json but only do so if told to as this file may be stale
