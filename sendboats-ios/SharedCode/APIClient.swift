@@ -83,14 +83,45 @@ class APIClient: NSObject {
         let fileType = getContentType(for: fileURL)
         body.append("Content-Type: \(fileType)\r\n\r\n".data(using: .utf8)!)
         
-        // Add file data
-        do {
-            let fileData = try Data(contentsOf: fileURL)
-            body.append(fileData)
-            body.append("\r\n".data(using: .utf8)!)
-        } catch {
+        // Add file data using NSFileCoordinator for safe access
+        var fileData: Data?
+        var fileCoordinatorError: NSError?
+        var fileReadingError: Error? // Local variable for reading error
+        let coordinator = NSFileCoordinator()
+
+        // Coordinate reading the file
+        coordinator.coordinate(readingItemAt: fileURL, options: [], error: &fileCoordinatorError) { (coordinatedURL) in
+            do {
+                // Read data from the coordinated URL
+                fileData = try Data(contentsOf: coordinatedURL)
+            } catch {
+                // Capture the reading error locally
+                fileReadingError = error
+                print("Error reading file data inside coordinator: \(error)")
+            }
+        }
+
+        // Check for errors after coordination completes
+        if let error = fileCoordinatorError {
+            print("File coordination error: \(error)")
             throw APIError.networkError(error)
         }
+        if let error = fileReadingError {
+             print("File reading error: \(error)")
+             throw APIError.networkError(error)
+        }
+
+        // Ensure file data was actually read
+        guard let actualFileData = fileData else {
+             // Throw an error if data couldn't be read for some reason (should be caught above ideally)
+             let readError = NSError(domain: "APIClient", code: 1, userInfo: [NSLocalizedDescriptionKey: "Failed to read file data using file coordinator, but no specific error was captured."])
+             print("Error: File data is nil after coordination block without a captured error.")
+             throw APIError.networkError(readError)
+        }
+
+        // Append the successfully read file data
+        body.append(actualFileData)
+        body.append("\r\n".data(using: .utf8)!)
         
         // Add preview image data if provided and file is a video
         if let previewData = previewImageData, fileType.starts(with: "video/") {

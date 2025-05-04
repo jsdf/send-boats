@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct APIConfiguration: Codable {
+struct APIConfiguration: Codable, Equatable  {
     var serverURL: String
     var username: String
     var password: String
