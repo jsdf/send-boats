@@ -18,14 +18,11 @@ public struct SuccessView: View {
     }
 
     public var body: some View {
-        VStack(spacing: 20) {
-            Image(systemName: "checkmark.circle.fill")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 80, height: 80)
-                .foregroundColor(.green)
+        ScrollView { // Added ScrollView
+            VStack(spacing: 20) {
+                // Image view removed
 
-            Text("Upload Successful!")
+                Text("Upload Successful!")
                 .font(.title)
                 .fontWeight(.bold)
 
@@ -49,11 +46,12 @@ public struct SuccessView: View {
                 .buttonStyle(.borderedProminent)
             }
         }
-        .padding()
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color(.systemGroupedBackground))
-        .cornerRadius(15)
-        .shadow(radius: 5)
-        .padding()
-    }
+        .padding() // Inner padding for VStack content
+    } // End ScrollView
+    .frame(maxWidth: .infinity, maxHeight: .infinity)
+    .background(Color(.systemGroupedBackground))
+    .cornerRadius(15)
+    .shadow(radius: 5)
+    .padding() // Outer padding for the whole view container
+}
 }

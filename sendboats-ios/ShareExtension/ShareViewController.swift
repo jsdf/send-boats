@@ -229,7 +229,9 @@ class ShareViewController: UIViewController {
         copyButton.isHidden = true
 
         let successViewModel = UploadViewModel()
+        // Set both state and the result property
         successViewModel.uploadState = .success(result)
+        successViewModel.uploadResult = result // Add this line
 
         let successSwiftUIView = SuccessView(viewModel: successViewModel, isShareExtensionContext: true)
 
