@@ -7,25 +7,31 @@
 
 import SwiftUI
 
-struct URLDisplayView: View {
-    let title: String
-    let url: URL
-    let onCopy: () -> Void
-    
-    var body: some View {
+public struct URLDisplayView: View {
+    public let title: String
+    public let url: URL
+    public let onCopy: () -> Void
+
+    public init(title: String, url: URL, onCopy: @escaping () -> Void) {
+        self.title = title
+        self.url = url
+        self.onCopy = onCopy
+    }
+
+    public var body: some View {
         VStack(spacing: 5) {
             Text(title)
                 .font(.caption)
-            
+
             HStack {
                 Text(url.absoluteString)
                     .font(.caption)
                     .foregroundColor(.blue)
                     .lineLimit(1)
                     .truncationMode(.middle)
-                
+
                 Spacer()
-                
+
                 Button(action: onCopy) {
                     Image(systemName: "doc.on.doc")
                         .foregroundColor(.blue)

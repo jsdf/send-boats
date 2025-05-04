@@ -95,10 +95,61 @@ struct PhotoPicker: UIViewControllerRepresentable {
                 // Create a temporary file URL
                 let tempDirectoryURL = FileManager.default.temporaryDirectory
                 let tempFileURL = tempDirectoryURL.appendingPathComponent(finalFileName.isEmpty ? "file_\(Date().timeIntervalSince1970)" : finalFileName)
+                let fileManager = FileManager.default
                 
+                // Ensure the destination doesn't exist already
+                if fileManager.fileExists(atPath: tempFileURL.path) {
+                    do {
+                        try fileManager.removeItem(at: tempFileURL)
+                        print("DEBUG: PhotoPicker - Removed existing item at temporary path: \(tempFileURL.path)")
+                    } catch {
+                        print("Error removing existing temporary file: \(error.localizedDescription)")
+                        // Decide if we should return or continue
+                        return // Let's return an error for now
+                    }
+                }
+
+                // Determine the correct source URL (file or file within directory)
+                var sourceURLToCopy: URL?
+                var isDirectory: ObjCBool = false
+                if fileManager.fileExists(atPath: url.path, isDirectory: &isDirectory) {
+                    if isDirectory.boolValue {
+                        // Source URL is a directory, find the file inside
+                        print("DEBUG: PhotoPicker - Source URL is a directory: \(url.path). Searching for file inside.")
+                        do {
+                            let contents = try fileManager.contentsOfDirectory(at: url, includingPropertiesForKeys: nil, options: [])
+                            // Assuming the first item is the file we want
+                            if let firstFile = contents.first {
+                                sourceURLToCopy = firstFile
+                                print("DEBUG: PhotoPicker - Found file inside directory: \(sourceURLToCopy!.path)")
+                            } else {
+                                print("Error: Source directory is empty.")
+                                return
+                            }
+                        } catch {
+                            print("Error reading contents of source directory: \(error.localizedDescription)")
+                            return
+                        }
+                    } else {
+                        // Source URL is already a file
+                        sourceURLToCopy = url
+                        print("DEBUG: PhotoPicker - Source URL is a file: \(url.path)")
+                    }
+                } else {
+                     print("Error: Source URL does not exist: \(url.path)")
+                     return
+                }
+
+                // Proceed with copying if we found a valid source file
+                guard let finalSourceURL = sourceURLToCopy else {
+                    print("Error: Could not determine the final source URL to copy.")
+                    return
+                }
+
                 do {
-                    // Copy the file to our temporary location
-                    try FileManager.default.copyItem(at: url, to: tempFileURL)
+                    // Copy the *actual file* to our temporary location
+                    try fileManager.copyItem(at: finalSourceURL, to: tempFileURL)
+                    print("DEBUG: PhotoPicker - Successfully copied file to: \(tempFileURL.path)")
                     
                     // Call the completion handler on the main thread
                     DispatchQueue.main.async {

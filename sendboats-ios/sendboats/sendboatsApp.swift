@@ -12,6 +12,10 @@ struct sendboatsApp: App {
     @StateObject private var viewModel = UploadViewModel()
     @State private var showingShareNotification = false
     
+    init() {
+        print("DEBUG: sendboatsApp - App is launching")
+    }
+    
     var body: some Scene {
         WindowGroup {
             ZStack {

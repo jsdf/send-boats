@@ -48,7 +48,7 @@ struct ContentView: View {
                     case .previewAndUpload:
                         VStack {
                             // Video preview
-                            if viewModel.isVideo {
+                            if viewModel.isVideoFile {
                                 VideoPreviewView(viewModel: viewModel)
                             }
                             
@@ -60,9 +60,7 @@ struct ContentView: View {
                         UploadProgressView(viewModel: viewModel)
                         
                     case .success:
-                        if case .success = viewModel.uploadState {
-                            SuccessView(viewModel: viewModel)
-                        }
+                        SuccessView(viewModel: viewModel)
                     }
                 }
                 

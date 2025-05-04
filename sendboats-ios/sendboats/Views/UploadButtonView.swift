@@ -13,8 +13,7 @@ struct UploadButtonView: View {
     var body: some View {
         Button(action: {
             Task {
-                viewModel.setupAPIClient()
-                await viewModel.uploadFile()
+                await viewModel.startUpload()
             }
         }) {
             HStack {
@@ -27,7 +26,9 @@ struct UploadButtonView: View {
             .foregroundColor(.white)
             .cornerRadius(10)
         }
-        .disabled(viewModel.uploadState == .generatingPreviews ||
+        .disabled(viewModel.uploadState == .generatingPreview ||
+                  viewModel.uploadState == .uploading ||
+                  viewModel.selectedFileURL == nil ||
                   viewModel.username.isEmpty ||
                   viewModel.password.isEmpty)
         .padding(.horizontal)
