@@ -4,8 +4,8 @@ a simple file sharing service with a server component and an ios client.
 
 ## components
 
-*   **[server/](server/)**: contains the cloudflare worker code that powers the backend api. see the [server readme](server/readme.md) for setup and deployment instructions.
-*   **[sendboats-ios/](sendboats-ios/)**: contains the xcode project for the ios client application. this app allows users to upload files to the send.boats server. see the [notes](notes.md) for the implementation plan.
+*   **[server/](server/)**: contains the cloudflare worker code that powers the backend api. see the [server readme](server/README.md) for setup and deployment instructions.
+*   **[sendboats-ios/](sendboats-ios/)**: contains the xcode project for the ios client application. this app allows users to upload files to the send.boats server, and includes sharesheet support.
 
 ## overview
 
