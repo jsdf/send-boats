@@ -183,21 +183,16 @@ class UploadService {
     
     // Helper to copy URL to clipboard (can be called from UI layer)
     static func copyURLToClipboard(_ url: URL?) {
+        ShareService.copyURLToClipboard(url)
+    }
+    
+    // Helper to share URL via share sheet (can be called from UI layer)
+    static func shareURL(_ url: URL?) {
         guard let url = url else { return }
-        #if canImport(UIKit)
-        UIPasteboard.general.string = url.absoluteString
-        print("DEBUG: UploadService - Copied URL to clipboard: \(url.absoluteString)")
-        #else
-        // Handle clipboard for other platforms if necessary (e.g., macOS)
-        print("DEBUG: UploadService - Clipboard copy not implemented for this platform.")
-        #endif
+        ShareService.shareURL(url)
     }
 }
 
 // Make sure VideoThumbnailGenerator is accessible here (move it to SharedCode)
 // Make sure APIClient is accessible here (ensure target membership)
 // Make sure ConfigurationManager is accessible here (ensure target membership)
-
-#if canImport(UIKit)
-import UIKit // Import UIKit conditionally for UIPasteboard
-#endif
