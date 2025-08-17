@@ -27,14 +27,14 @@ public struct SuccessView: View {
                 .fontWeight(.bold)
 
             if let viewURL = viewModel.uploadResult?.viewURL {
-                URLDisplayView(title: "View URL:", url: viewURL, onCopy: {
-                    UIPasteboard.general.string = viewURL.absoluteString
+                URLDisplayView(title: "View URL:", url: viewURL, onShare: {
+                    ShareService.shareURL(viewURL)
                 })
             }
 
             if let fullViewURL = viewModel.uploadResult?.fullViewURL {
-                URLDisplayView(title: "Full URL:", url: fullViewURL, onCopy: {
-                    UIPasteboard.general.string = fullViewURL.absoluteString
+                URLDisplayView(title: "Full URL:", url: fullViewURL, onShare: {
+                    ShareService.shareURL(fullViewURL)
                 })
             }
 

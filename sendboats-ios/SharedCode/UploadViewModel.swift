@@ -187,6 +187,11 @@ public class UploadViewModel: ObservableObject {
     }
 
     func copyURLToClipboard(_ url: URL?) {
-        UploadService.copyURLToClipboard(url)
+        ShareService.copyURLToClipboard(url)
+    }
+    
+    func shareURL(_ url: URL?) {
+        guard let url = url else { return }
+        ShareService.shareURL(url)
     }
 }
