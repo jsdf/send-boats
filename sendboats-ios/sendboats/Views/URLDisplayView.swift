@@ -11,11 +11,13 @@ public struct URLDisplayView: View {
     public let title: String
     public let url: URL
     public let onCopy: () -> Void
+    public let onShare: (() -> Void)?
 
-    public init(title: String, url: URL, onCopy: @escaping () -> Void) {
+    public init(title: String, url: URL, onCopy: @escaping () -> Void, onShare: (() -> Void)? = nil) {
         self.title = title
         self.url = url
         self.onCopy = onCopy
+        self.onShare = onShare
     }
 
     public var body: some View {
@@ -32,9 +34,34 @@ public struct URLDisplayView: View {
 
                 Spacer()
 
-                Button(action: onCopy) {
-                    Image(systemName: "doc.on.doc")
-                        .foregroundColor(.blue)
+                HStack(spacing: 8) {
+                    Button(action: onCopy) {
+                        Image(systemName: "doc.on.doc")
+                            .foregroundColor(.blue)
+                            .font(.system(size: 16))
+                    }
+                    .frame(minWidth: 44, minHeight: 44)
+                    .background(Color(.systemBackground))
+                    .cornerRadius(8)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(Color(.systemGray4), lineWidth: 1)
+                    )
+                    
+                    if let onShare = onShare {
+                        Button(action: onShare) {
+                            Image(systemName: "square.and.arrow.up")
+                                .foregroundColor(.blue)
+                                .font(.system(size: 16))
+                        }
+                        .frame(minWidth: 44, minHeight: 44)
+                        .background(Color(.systemBackground))
+                        .cornerRadius(8)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(Color(.systemGray4), lineWidth: 1)
+                        )
+                    }
                 }
             }
             .padding()
@@ -48,7 +75,8 @@ public struct URLDisplayView: View {
     URLDisplayView(
         title: "Example URL:",
         url: URL(string: "https://example.com/file/12345")!,
-        onCopy: {}
+        onCopy: {},
+        onShare: {}
     )
     .padding()
     .previewLayout(.sizeThatFits)
