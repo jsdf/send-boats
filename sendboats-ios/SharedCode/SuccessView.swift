@@ -11,8 +11,8 @@ import UIKit
 public struct SuccessView: View {
     @ObservedObject public var viewModel: UploadViewModel
     @State private var showCopiedMessage = false
-    @State private var showShareSheet = false
-    @State private var shareURL: URL?
+    @State private var showViewURLShareSheet = false
+    @State private var showFullURLShareSheet = false
     public var isShareExtensionContext: Bool = false
 
     public init(viewModel: UploadViewModel, isShareExtensionContext: Bool = false) {
@@ -37,8 +37,7 @@ public struct SuccessView: View {
                         UIPasteboard.general.string = viewURL.absoluteString
                     },
                     onShare: {
-                        shareURL = viewURL
-                        showShareSheet = true
+                        showViewURLShareSheet = true
                     }
                 )
             }
@@ -51,8 +50,7 @@ public struct SuccessView: View {
                         UIPasteboard.general.string = fullViewURL.absoluteString
                     },
                     onShare: {
-                        shareURL = fullViewURL
-                        showShareSheet = true
+                        showFullURLShareSheet = true
                     }
                 )
             }
@@ -72,9 +70,14 @@ public struct SuccessView: View {
     .cornerRadius(15)
     .shadow(radius: 5)
     .padding() // Outer padding for the whole view container
-    .sheet(isPresented: $showShareSheet) {
-        if let shareURL = shareURL {
-            ActivityViewController(activityItems: [shareURL])
+    .sheet(isPresented: $showViewURLShareSheet) {
+        if let viewURL = viewModel.uploadResult?.viewURL {
+            ActivityViewController(activityItems: [viewURL])
+        }
+    }
+    .sheet(isPresented: $showFullURLShareSheet) {
+        if let fullViewURL = viewModel.uploadResult?.fullViewURL {
+            ActivityViewController(activityItems: [fullViewURL])
         }
     }
     }

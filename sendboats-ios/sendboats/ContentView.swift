@@ -77,6 +77,7 @@ struct ContentView: View {
                 DocumentPicker(
                     onFilePicked: { fileURL, fileName in
                         viewModel.handleFileSelection(fileURL: fileURL, fileName: fileName)
+                        showingDocumentPicker = false
                     }
                 )
             }
@@ -84,6 +85,7 @@ struct ContentView: View {
                 PhotoPicker(
                     onFilePicked: { fileURL, fileName in
                         viewModel.handleFileSelection(fileURL: fileURL, fileName: fileName)
+                        showingPhotoPicker = false
                     }
                 )
             }
