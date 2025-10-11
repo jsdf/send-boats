@@ -239,3 +239,4 @@ playground.xcworkspace
 *.ipa
 *.dSYM.zip
 *.dSYM
+server/.dev.vars
