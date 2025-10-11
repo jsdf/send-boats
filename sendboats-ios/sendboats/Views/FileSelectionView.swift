@@ -45,6 +45,25 @@ struct FileSelectionView: View {
                 }
             }
             
+            // View Files link
+            if !viewModel.serverURL.isEmpty {
+                Button(action: {
+                    if let url = URL(string: viewModel.serverURL) {
+                        UIApplication.shared.open(url)
+                    }
+                }) {
+                    HStack {
+                        Image(systemName: "globe")
+                        Text("View Files on Website")
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.gray.opacity(0.2))
+                    .foregroundColor(.blue)
+                    .cornerRadius(10)
+                }
+            }
+            
             // Selected file display
             if !viewModel.selectedFileName.isEmpty {
                 HStack {
