@@ -68,6 +68,10 @@ public class UploadViewModel: ObservableObject {
             return .previewAndUpload
         }
     }
+    
+    var showHeader: Bool {
+        return uiFlowState == .fileSelection
+    }
 
     @Published public var isVideoFile: Bool = false
 

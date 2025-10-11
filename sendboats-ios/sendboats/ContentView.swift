@@ -23,7 +23,9 @@ struct ContentView: View {
         NavigationView {
             VStack(spacing: 20) {
                 // Header
-                HeaderView()
+                if viewModel.showHeader {
+                    HeaderView()
+                }
                 
                 Spacer()
                 
