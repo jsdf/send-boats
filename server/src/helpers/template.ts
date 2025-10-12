@@ -46,25 +46,15 @@ async function fetchTemplate(templateName: string, env: Env): Promise<string> {
  * @returns The processed template as a string
  */
 export async function renderTemplate(templateName: string, replacements: Record<string, string>, env: Env): Promise<string> {
-	console.log(`[DEBUG] renderTemplate called with templateName: ${templateName}`);
-	console.log(`[DEBUG] VITE_DEV_URL: ${env.VITE_DEV_URL}`);
-	console.log(`[DEBUG] replacements:`, replacements);
-
 	// Fetch template from appropriate source
 	const template = await fetchTemplate(templateName, env);
-	console.log(`[DEBUG] Template fetched, length: ${template.length}`);
-	console.log(`[DEBUG] Template preview:`, template.substring(0, 200));
 
 	// Replace all placeholders with their values
 	let result = template;
 	for (const [key, value] of Object.entries(replacements)) {
 		const regex = new RegExp(`{{${key}}}`, 'g');
-		const beforeCount = (result.match(regex) || []).length;
 		result = result.replace(regex, value);
-		const afterCount = (result.match(regex) || []).length;
-		console.log(`[DEBUG] Replaced ${beforeCount - afterCount} instances of {{${key}}}`);
 	}
 
-	console.log(`[DEBUG] Final result length: ${result.length}`);
 	return result;
 }
