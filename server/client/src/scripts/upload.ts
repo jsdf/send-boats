@@ -3,11 +3,16 @@ const previewSection = document.getElementById('previewSection') as HTMLDivEleme
 const previewContainer = document.getElementById('previewContainer') as HTMLDivElement;
 const previewDataInput = document.getElementById('previewDataInput') as HTMLInputElement;
 const form = document.getElementById('uploadForm') as HTMLFormElement;
+const submitBtn = document.getElementById('submitBtn') as HTMLButtonElement;
 
 let selectedPreviewBlob: Blob | null = null;
 
 console.log('Upload script loaded');
-interface VideoFrame {
+
+// Disable submit button until a file is selected
+submitBtn.disabled = true;
+
+interface VideoPreviewFrame {
 	blob: Blob;
 	timestamp: number;
 }
@@ -15,6 +20,10 @@ interface VideoFrame {
 fileInput.addEventListener('change', async (e) => {
 	const target = e.target as HTMLInputElement;
 	const file = target.files?.[0];
+
+	// Enable/disable submit button based on file selection
+	submitBtn.disabled = !file;
+
 	if (!file) return;
 
 	// Clear previous previews
@@ -32,7 +41,9 @@ fileInput.addEventListener('change', async (e) => {
 		frames.forEach((frame, index) => {
 			const previewOption = document.createElement('div');
 			previewOption.className = `relative cursor-pointer border-2 rounded-lg overflow-hidden transition-all ${
-				index === 0 ? 'border-primary ring-2 ring-primary ring-opacity-30' : 'border-transparent hover:border-base-content hover:border-opacity-20'
+				index === 0
+					? 'border-primary ring-2 ring-primary ring-opacity-30'
+					: 'border-transparent hover:border-base-content hover:border-opacity-20'
 			}`;
 
 			const img = document.createElement('img');
@@ -52,7 +63,10 @@ fileInput.addEventListener('change', async (e) => {
 				document.querySelectorAll('#previewContainer > div').forEach((el) => {
 					el.className = el.className.replace('border-primary ring-2 ring-primary ring-opacity-30', 'border-transparent');
 				});
-				previewOption.className = previewOption.className.replace('border-transparent', 'border-primary ring-2 ring-primary ring-opacity-30');
+				previewOption.className = previewOption.className.replace(
+					'border-transparent',
+					'border-primary ring-2 ring-primary ring-opacity-30'
+				);
 				selectedPreviewBlob = frame.blob;
 			});
 
@@ -118,7 +132,7 @@ form.addEventListener('submit', async (e) => {
 });
 
 // Function to generate multiple preview frames from a video
-async function generateVideoFrames(videoFile: File, numFrames: number = 3): Promise<VideoFrame[]> {
+async function generateVideoFrames(videoFile: File, numFrames: number = 3): Promise<VideoPreviewFrame[]> {
 	return new Promise((resolve, reject) => {
 		const video = document.createElement('video');
 		video.autoplay = false;
@@ -126,7 +140,7 @@ async function generateVideoFrames(videoFile: File, numFrames: number = 3): Prom
 		video.src = URL.createObjectURL(videoFile);
 
 		video.onloadedmetadata = () => {
-			const frames: VideoFrame[] = [];
+			const frames: VideoPreviewFrame[] = [];
 			let framesProcessed = 0;
 
 			// Calculate timestamps at different points in the video
