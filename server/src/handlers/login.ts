@@ -1,6 +1,6 @@
 // src/handlers/login.ts
 import { Env } from '../types';
-import { renderTemplate } from '../helpers/template';
+import { renderPage } from '../helpers/prerenderedPage';
 
 export async function handleLogin(request: Request, env: Env): Promise<Response> {
 	// Handle GET request - show login form
@@ -23,7 +23,7 @@ async function showLoginForm(env: Env, error?: string): Promise<Response> {
 		console.log('Showing login form with error:', error);
 	}
 
-	const html = await renderTemplate('login', { error: errorHtml }, env);
+	const html = await renderPage('login', { error: errorHtml }, env);
 
 	return new Response(html, {
 		headers: { 'Content-Type': 'text/html; charset=utf-8' },

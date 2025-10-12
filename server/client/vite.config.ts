@@ -1,7 +1,7 @@
-import { dirname, resolve } from 'node:path';
+import { dirname, resolve, basename, extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { defineConfig, Plugin } from 'vite';
-
+import { glob } from 'glob';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 // Plugin to make asset URLs absolute in dev mode
@@ -40,15 +40,17 @@ export default defineConfig(({ mode }) => ({
 	plugins: mode === 'development' ? [absoluteUrlPlugin()] : [],
 	build: {
 		rollupOptions: {
-			input: {
-				'templates/list': resolve(__dirname, 'templates/list.html'),
-				'templates/upload': resolve(__dirname, 'templates/upload.html'),
-				'templates/view': resolve(__dirname, 'templates/view.html'),
-				'templates/full-video': resolve(__dirname, 'templates/full-video.html'),
-				'templates/full-image': resolve(__dirname, 'templates/full-image.html'),
-				'templates/full-audio': resolve(__dirname, 'templates/full-audio.html'),
-				'templates/login': resolve(__dirname, 'templates/login.html'),
-			},
+			// e.g.
+			// input: {
+			// 	'prerender/list': resolve(__dirname, 'prerender/list.html'),
+			// 	'prerender/upload': resolve(__dirname, 'prerender/upload.html'),
+			//   ...
+			// },
+			input: glob.sync('prerender/*.html', { cwd: __dirname }).reduce((inputs, file) => {
+				const name = basename(file, extname(file));
+				inputs[name] = resolve(__dirname, file);
+				return inputs;
+			}, {} as Record<string, string>),
 		},
 		outDir: 'dist',
 	},

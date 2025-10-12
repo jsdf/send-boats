@@ -1,6 +1,6 @@
 // src/handlers/list.ts
 import { Env, UploadRecord } from '../types';
-import { renderTemplate } from '../helpers/template';
+import { renderPage } from '../helpers/prerenderedPage';
 import { escapeHtml } from '../helpers/html';
 
 function buildPaginationHtml(page: number, hasNextPage: boolean): string {
@@ -9,24 +9,24 @@ function buildPaginationHtml(page: number, hasNextPage: boolean): string {
 	}
 
 	let html = '<div class="flex justify-center items-center gap-4 my-6">';
-	
+
 	// Previous button
 	if (page > 1) {
 		html += `<a href="/?page=${page - 1}" class="btn btn-sm">← Previous</a>`;
 	} else {
 		html += `<button class="btn btn-sm btn-disabled">← Previous</button>`;
 	}
-	
+
 	// Current page indicator
 	html += `<span class="text-sm opacity-70">Page ${page}</span>`;
-	
+
 	// Next button
 	if (hasNextPage) {
 		html += `<a href="/?page=${page + 1}" class="btn btn-sm">Next →</a>`;
 	} else {
 		html += `<button class="btn btn-sm btn-disabled">Next →</button>`;
 	}
-	
+
 	html += '</div>';
 	return html;
 }
@@ -40,9 +40,7 @@ export async function handleList(request: Request, env: Env): Promise<Response> 
 		const offset = (page - 1) * pageSize;
 
 		// Fetch one extra record to check if there's a next page
-		const result = await env.DB.prepare(
-			'SELECT * FROM uploads ORDER BY uploaded_at DESC LIMIT ? OFFSET ?'
-		)
+		const result = await env.DB.prepare('SELECT * FROM uploads ORDER BY uploaded_at DESC LIMIT ? OFFSET ?')
 			.bind(pageSize + 1, offset)
 			.all<UploadRecord>();
 		const allResults = result.results || [];
@@ -56,9 +54,7 @@ export async function handleList(request: Request, env: Env): Promise<Response> 
 			for (const file of files) {
 				// Determine if we should show a preview thumbnail and link
 				const hasPreview = file.filetype.startsWith('video/') && file.has_preview;
-				const previewLink = hasPreview
-					? `<a href="/preview/${file.id}" target="_blank" class="link link-primary">Preview</a> | `
-					: '';
+				const previewLink = hasPreview ? `<a href="/preview/${file.id}" target="_blank" class="link link-primary">Preview</a> | ` : '';
 
 				// Add thumbnail for videos with previews
 				const thumbnailHtml = hasPreview
@@ -99,8 +95,8 @@ export async function handleList(request: Request, env: Env): Promise<Response> 
 		const isDirty = env.GIT_DIRTY === 'true';
 		const versionInfo = `${gitSha}${isDirty ? '-dirty' : ''}`;
 
-		// Render the template with our data
-		const html = await renderTemplate(
+		// Render the prerenderedPage with our data
+		const html = await renderPage(
 			'list',
 			{
 				FILE_LIST: listHtml,

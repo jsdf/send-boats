@@ -1,7 +1,7 @@
 // src/handlers/view.ts
 import { Env, UploadRecord } from '../types';
 import { generateMetaTags } from '../helpers/meta';
-import { renderTemplate } from '../helpers/template';
+import { renderPage } from '../helpers/prerenderedPage';
 import { buildUrl, getOriginUrl } from '../helpers/url';
 import { escapeHtml } from '../helpers/html';
 
@@ -42,7 +42,7 @@ export async function handleView(request: Request, key: string, env: Env): Promi
 	const downloadUrl = buildUrl(`/download/${key}`, request, env);
 	const originUrl = getOriginUrl(request, env);
 
-	const html = await renderTemplate(
+	const html = await renderPage(
 		'view',
 		{
 			FILENAME: escapeHtml(record.filename),

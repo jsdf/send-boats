@@ -82,7 +82,7 @@ export default {
 			return await handlePreview(key, env);
 		}
 
-		// PRIORITY 2: Static assets (CSS, JS, etc.) - but NOT HTML templates
+		// PRIORITY 2: Static assets (CSS, JS, etc.) - but NOT HTML prerenderedPages
 		// Don't serve HTML files as static assets - they should be processed by handlers above
 		if (pathname.endsWith('.html')) {
 			return new Response('Not Found', { status: 404 });

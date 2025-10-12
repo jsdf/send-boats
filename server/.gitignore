@@ -2,3 +2,6 @@
 .dev.vars
 .wrangler/
 wrangler-dev.log
+dist/
+client/dist/
+client/node_modules/

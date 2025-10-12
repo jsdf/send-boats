@@ -1,7 +1,7 @@
 // src/handlers/full.ts
 import { Env, UploadRecord } from '../types';
 import { generateMetaTags } from '../helpers/meta';
-import { renderTemplate } from '../helpers/template';
+import { renderPage } from '../helpers/prerenderedPage';
 import { buildUrl } from '../helpers/url';
 import { escapeHtml } from '../helpers/html';
 
@@ -19,7 +19,7 @@ export async function handleFull(request: Request, key: string, env: Env): Promi
 	const downloadUrl = buildUrl(`/download/${key}`, request, env);
 
 	if (record.filetype.startsWith('video/')) {
-		html = await renderTemplate(
+		html = await renderPage(
 			'full-video',
 			{
 				FILENAME: escapeHtml(record.filename),
@@ -30,7 +30,7 @@ export async function handleFull(request: Request, key: string, env: Env): Promi
 			env
 		);
 	} else if (record.filetype.startsWith('image/')) {
-		html = await renderTemplate(
+		html = await renderPage(
 			'full-image',
 			{
 				FILENAME: escapeHtml(record.filename),
@@ -40,7 +40,7 @@ export async function handleFull(request: Request, key: string, env: Env): Promi
 			env
 		);
 	} else if (record.filetype.startsWith('audio/')) {
-		html = await renderTemplate(
+		html = await renderPage(
 			'full-audio',
 			{
 				FILENAME: escapeHtml(record.filename),

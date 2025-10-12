@@ -89,15 +89,15 @@ fileSelection → previewAndUpload → uploading → success
 The server uses a two-phase rendering system:
 
 1. **Static Compilation (Vite Build)**
-   - HTML templates in `server/templates/*.html` are processed by Vite
+   - HTML prerendered pages in `server/prerendered pages/*.html` are processed by Vite
    - CSS compiled with Tailwind/PostCSS and bundled
    - Built assets output to `server/dist/`
-   - Templates preserve placeholder variables: `{{FILENAME}}`, `{{FILE_ID}}`, `{{META_TAGS}}`
+   - Prerendered Pages preserve placeholder variables: `{{FILENAME}}`, `{{FILE_ID}}`, `{{META_TAGS}}`
 
 2. **Dynamic Injection (Cloudflare Worker Runtime)**
    - Worker intercepts route requests before serving static assets
-   - Handlers fetch pre-compiled templates from `env.ASSETS` (prod) or Vite dev server (dev)
-   - `renderTemplate()` performs string substitution on placeholders with dynamic data
+   - Handlers fetch pre-compiled prerendered pages from `env.ASSETS` (prod) or Vite dev server (dev)
+   - `renderPage()` performs string substitution on placeholders with dynamic data
    - Fully-rendered HTML returned to client
 
 **URL Resolution in Development vs Production:**
@@ -117,16 +117,16 @@ Critical difference affects how links work:
   - Single origin serves everything
   - No URL transformation
 
-**Template Development Guidelines:**
+**Prerendered Page Development Guidelines:**
 - Use relative URLs for all navigation and API calls: `/download/{{FILE_ID}}`
 - Never hardcode absolute URLs or base paths
 - Asset links (CSS/JS) are automatically handled by Vite per environment
-- Worker blocks direct `.html` access; templates only served through handlers with data injection
+- Worker blocks direct `.html` access; prerendered pages only served through handlers with data injection
 - **CRITICAL**: Always use `buildUrl(path, request, env)` or `getOriginUrl(request, env)` from `src/helpers/url.ts` instead of `new URL(path, request.url)` because `request.url` contains the production hostname even in dev mode
 
 **IMPORTANT: Image/Media Sources Pointing to Worker Routes**
 
-When an `<img>` or `<video>` source points to a worker route (not a static asset), you must build the full URL in the worker and template it in:
+When an `<img>` or `<video>` source points to a worker route (not a static asset), you must build the full URL in the worker and prerendered page it in:
 
 ❌ **BROKEN** - Relative path in `<img src>` pointing to worker route:
 ```html
@@ -141,13 +141,13 @@ Problem: Vite's plugin rewrites to `http://localhost:5173/download/...` (port 51
 import { buildUrl } from '../helpers/url';
 
 const downloadUrl = buildUrl(`/download/${key}`, request, env);
-html = await renderTemplate('full-image', {
+html = await renderPage('full-image', {
   DOWNLOAD_URL: downloadUrl,  // e.g., "http://127.0.0.1:8787/download/abc123"
   FILENAME: escapeHtml(record.filename),
 }, env);
 ```
 ```html
-<!-- Template: -->
+<!-- Prerendered Page: -->
 <img src="{{DOWNLOAD_URL}}" alt="{{FILENAME}}" />
 ```
 Result: The `buildUrl()` helper uses the `Host` header to get the correct hostname (127.0.0.1:8787 in dev, send.boats in prod). Vite plugin ignores already-absolute URLs. Works in both dev and production.

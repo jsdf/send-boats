@@ -7,10 +7,10 @@ compatibility_date = "2025-01-29"
 main = "src/index.ts"
 
 [assets]
-directory = "./dist"
+directory = "./client/dist"
 binding = "ASSETS"
 
-# HTML templates should be processed by the Worker, not served as static assets
+# HTML prerenderedPages should be processed by the Worker, not served as static assets
 # [[rules]]
 # type = "ESModule"
 # globs = ["**/*.html"]

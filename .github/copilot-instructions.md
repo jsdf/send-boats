@@ -67,13 +67,13 @@ ALWAYS run through these scenarios after making server changes:
 - **npm install**: 20 seconds. NEVER CANCEL. Set timeout to 60+ seconds.
 - **npm run dev**: 10 seconds startup. NEVER CANCEL. Set timeout to 30+ seconds.
 - **Database operations**: 1-2 seconds. Set timeout to 30+ seconds.
-- **npm test**: Currently broken due to vitest configuration issues with template imports.
+- **npm test**: Currently broken due to vitest configuration issues with prerendered page imports.
 
 ## Known Issues and Limitations
 
 ### Server Issues
 
-- **Tests are broken**: npm test fails due to vitest configuration expecting wrangler.json instead of wrangler.toml, and template import issues.
+- **Tests are broken**: npm test fails due to vitest configuration expecting wrangler.json instead of wrangler.toml, and prerendered page import issues.
 - **No working linters**: No ESLint or other linters installed. Prettier config exists but prettier package not installed.
 - **Database must be initialized**: First-time setup requires running schema.sql against local D1 database.
 
@@ -127,21 +127,21 @@ The server uses a hybrid rendering approach combining Vite's static compilation 
 
 1. **Build Phase (Vite)**:
 
-   - HTML templates in `server/templates/*.html` are compiled by Vite
+   - HTML prerendered pages in `server/prerendered pages/*.html` are compiled by Vite
    - CSS is processed with Tailwind/PostCSS and bundled
    - Output goes to `server/dist/` directory
-   - Templates contain placeholder variables like `{{FILENAME}}`, `{{FILE_ID}}`, `{{META_TAGS}}`
+   - Prerendered Pages contain placeholder variables like `{{FILENAME}}`, `{{FILE_ID}}`, `{{META_TAGS}}`
 
 2. **Runtime Phase (Cloudflare Worker)**:
    - Worker sits in front of compiled assets via `[assets]` binding
-   - Route handlers fetch templates from `env.ASSETS` (production) or Vite dev server (development)
-   - `renderTemplate()` helper performs simple string replacement on placeholders
+   - Route handlers fetch prerendered pages from `env.ASSETS` (production) or Vite dev server (development)
+   - `renderPage()` helper performs simple string replacement on placeholders
    - Worker serves fully-rendered HTML with dynamic data injected
 
 **Key Files:**
 
-- `vite.config.ts` - Defines which templates to build as entry points
-- `src/helpers/template.ts` - Template fetching and variable substitution logic
+- `vite.config.ts` - Defines which prerendered pages to build as entry points
+- `src/helpers/prerendered page.ts` - Prerendered Page fetching and variable substitution logic
 - `src/helpers/url.ts` - URL building utilities that handle dev vs prod hostname correctly
 - `wrangler.toml` - Configures `[assets]` binding to `dist/` directory
 
@@ -159,7 +159,7 @@ The server uses a hybrid rendering approach combining Vite's static compilation 
 
 - **Production Mode**:
   - All URLs are relative
-  - Worker serves both templates and assets from same origin via `env.ASSETS`
+  - Worker serves both prerendered pages and assets from same origin via `env.ASSETS`
   - No special URL transformation needed
 
 **Plugin Behavior** (`vite.config.ts`):
@@ -169,11 +169,11 @@ The server uses a hybrid rendering approach combining Vite's static compilation 
 // Does NOT rewrite: <a href="...">, <form action="...">, fetch() URLs
 ```
 
-**Implications for Template Development:**
+**Implications for Prerendered Page Development:**
 
 - Always use relative URLs for navigation: `/download/{{FILE_ID}}`, not `{{BASE_URL}}/download/{{FILE_ID}}`
 - Asset URLs (CSS/JS) can be relative; Vite handles them appropriately per environment
-- Worker's `env.VITE_DEV_URL` controls whether templates come from dev server or built assets
+- Worker's `env.VITE_DEV_URL` controls whether prerendered pages come from dev server or built assets
 - **CRITICAL**: When building URLs in handlers, use `buildUrl(path, request, env)` or `getOriginUrl(request, env)` from `src/helpers/url.ts` instead of `new URL(path, request.url)` because `request.url` has the wrong hostname in dev mode
 
 **Common Bug: Image Sources Pointing to Worker Routes**
@@ -188,14 +188,14 @@ The server uses a hybrid rendering approach combining Vite's static compilation 
 - Points to Vite dev server (port 5173), but route handler is on worker (port 8787)
 - Results in 404 because Vite doesn't have the `/download/` route
 
-✅ **CORRECT - Template full URL in worker**:
+✅ **CORRECT - Prerendered Page full URL in worker**:
 
 ```typescript
 // In handler (e.g., full.ts):
 import {buildUrl} from '../helpers/url';
 
 const downloadUrl = buildUrl(`/download/${key}`, request, env);
-html = await renderTemplate(
+html = await renderPage(
   'full-image',
   {
     FILENAME: escapeHtml(record.filename),
@@ -207,7 +207,7 @@ html = await renderTemplate(
 ```
 
 ```html
-<!-- In template: -->
+<!-- In prerendered page: -->
 <img src="{{DOWNLOAD_URL}}" alt="{{FILENAME}}" />
 ```
 
@@ -215,9 +215,9 @@ html = await renderTemplate(
 - Vite plugin ignores it (already absolute)
 - Works in both dev and production
 
-### Template HTML Blocking
+### Prerendered Page HTML Blocking
 
-The worker explicitly blocks direct access to HTML templates:
+The worker explicitly blocks direct access to HTML prerendered pages:
 
 ```typescript
 if (pathname.endsWith('.html')) {
@@ -225,7 +225,7 @@ if (pathname.endsWith('.html')) {
 }
 ```
 
-This ensures templates are only served through route handlers that inject dynamic data, never as raw static files.
+This ensures prerendered pages are only served through route handlers that inject dynamic data, never as raw static files.
 
 ## Project Structure
 
@@ -233,11 +233,11 @@ This ensures templates are only served through route handlers that inject dynami
 
 - `src/index.ts` - Main worker entry point
 - `src/handlers/` - Request handlers (upload, download, list, etc.)
-- `src/helpers/template.ts` - Template fetching and variable substitution
+- `src/helpers/prerendered page.ts` - Prerendered Page fetching and variable substitution
 - `src/helpers/` - Auth, rate limiting, other helpers
-- `templates/*.html` - HTML templates with `{{VARIABLE}}` placeholders
+- `prerendered pages/*.html` - HTML prerendered pages with `{{VARIABLE}}` placeholders
 - `src/styles/` - CSS source files processed by Vite
-- `dist/` - Vite build output (templates + bundled assets)
+- `dist/` - Vite build output (prerendered pages + bundled assets)
 - `schema.sql` - Database schema
 - `vite.config.ts` - Static asset compilation configuration
 - `wrangler.toml` - Cloudflare Workers configuration with `[assets]` binding
