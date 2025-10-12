@@ -3,6 +3,7 @@ import { Env, UploadRecord } from '../types';
 import { generateMetaTags } from '../helpers/meta';
 import { renderTemplate } from '../helpers/template';
 import { buildUrl } from '../helpers/url';
+import { escapeHtml } from '../helpers/html';
 
 export async function handleFull(request: Request, key: string, env: Env): Promise<Response> {
 	const record: UploadRecord | null = await env.DB.prepare('SELECT * FROM uploads WHERE id = ?').bind(key).first();
@@ -13,20 +14,6 @@ export async function handleFull(request: Request, key: string, env: Env): Promi
 	// Use the request URL for generating meta tags
 	const metaTags = generateMetaTags(record, key, request.url);
 	const headers = { 'Content-Type': 'text/html;charset=UTF-8' };
-
-	// Escape HTML in filename for safety
-	const escapeHtml = (text: string) =>
-		text.replace(
-			/[&<>"']/g,
-			(m) =>
-				({
-					'&': '&amp;',
-					'<': '&lt;',
-					'>': '&gt;',
-					'"': '&quot;',
-					"'": '&#39;',
-				}[m] || m)
-		);
 
 	let html: string;
 	const downloadUrl = buildUrl(`/download/${key}`, request, env);

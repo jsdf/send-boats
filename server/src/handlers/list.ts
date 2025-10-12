@@ -1,11 +1,53 @@
 // src/handlers/list.ts
 import { Env, UploadRecord } from '../types';
 import { renderTemplate } from '../helpers/template';
+import { escapeHtml } from '../helpers/html';
+
+function buildPaginationHtml(page: number, hasNextPage: boolean): string {
+	if (page === 1 && !hasNextPage) {
+		return '';
+	}
+
+	let html = '<div class="flex justify-center items-center gap-4 my-6">';
+	
+	// Previous button
+	if (page > 1) {
+		html += `<a href="/?page=${page - 1}" class="btn btn-sm">← Previous</a>`;
+	} else {
+		html += `<button class="btn btn-sm btn-disabled">← Previous</button>`;
+	}
+	
+	// Current page indicator
+	html += `<span class="text-sm opacity-70">Page ${page}</span>`;
+	
+	// Next button
+	if (hasNextPage) {
+		html += `<a href="/?page=${page + 1}" class="btn btn-sm">Next →</a>`;
+	} else {
+		html += `<button class="btn btn-sm btn-disabled">Next →</button>`;
+	}
+	
+	html += '</div>';
+	return html;
+}
 
 export async function handleList(request: Request, env: Env): Promise<Response> {
 	try {
-		const result = await env.DB.prepare('SELECT * FROM uploads ORDER BY uploaded_at DESC').all<UploadRecord>();
-		const files = result.results || [];
+		// Parse pagination parameters
+		const url = new URL(request.url);
+		const page = Math.max(1, parseInt(url.searchParams.get('page') || '1', 10));
+		const pageSize = 50;
+		const offset = (page - 1) * pageSize;
+
+		// Fetch one extra record to check if there's a next page
+		const result = await env.DB.prepare(
+			'SELECT * FROM uploads ORDER BY uploaded_at DESC LIMIT ? OFFSET ?'
+		)
+			.bind(pageSize + 1, offset)
+			.all<UploadRecord>();
+		const allResults = result.results || [];
+		const hasNextPage = allResults.length > pageSize;
+		const files = hasNextPage ? allResults.slice(0, pageSize) : allResults;
 
 		let listHtml = '';
 		if (files.length === 0) {
@@ -24,20 +66,6 @@ export async function handleList(request: Request, env: Env): Promise<Response> 
 							<img src="/preview/${file.id}" alt="Preview" class="w-full h-auto sm:h-18 object-cover rounded-lg border border-base-300" />
 						</div>`
 					: '';
-
-				// Escape HTML in filename
-				const escapeHtml = (text: string) =>
-					text.replace(
-						/[&<>"']/g,
-						(m) =>
-							({
-								'&': '&amp;',
-								'<': '&lt;',
-								'>': '&gt;',
-								'"': '&quot;',
-								"'": '&#39;',
-							}[m] || m)
-					);
 
 				listHtml += `
 					<div class="card bg-base-100 shadow-sm p-4 ${hasPreview ? 'sm:flex sm:gap-4' : ''}">
@@ -63,6 +91,9 @@ export async function handleList(request: Request, env: Env): Promise<Response> 
 			}
 		}
 
+		// Build pagination controls
+		const paginationHtml = buildPaginationHtml(page, hasNextPage);
+
 		// Get version information from environment variables
 		const gitSha = env.GIT_SHA || 'development';
 		const isDirty = env.GIT_DIRTY === 'true';
@@ -73,6 +104,7 @@ export async function handleList(request: Request, env: Env): Promise<Response> 
 			'list',
 			{
 				FILE_LIST: listHtml,
+				PAGINATION: paginationHtml,
 				VERSION_INFO: versionInfo,
 			},
 			env
