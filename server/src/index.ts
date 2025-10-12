@@ -21,41 +21,76 @@ export default {
 		const pathname = url.pathname;
 		const method = request.method;
 
-		// Protected routes: /upload, /upload-form, /list (or /), and /delete/*
-		if (
-			(method === 'POST' && pathname === '/upload') ||
-			(method === 'GET' && pathname === '/upload-form') ||
-			(method === 'GET' && (pathname === '/' || pathname === '/list')) ||
-			(method === 'POST' && pathname.startsWith('/delete/'))
-		) {
+		// PRIORITY 1: Handle dynamic routes FIRST to preempt asset serving
+
+		// Server-rendered page routes (with auth)
+		if (method === 'GET' && (pathname === '/' || pathname === '/list')) {
 			const authResp = await checkBasicAuth(request, env);
 			if (authResp) return authResp;
+			return await handleList(request, env);
 		}
 
-		if (method === 'POST' && pathname === '/upload') {
-			return await handleUpload(request, env);
-		} else if (method === 'GET' && pathname === '/upload-form') {
+		if (method === 'GET' && pathname === '/upload-form') {
+			const authResp = await checkBasicAuth(request, env);
+			if (authResp) return authResp;
 			return await handleUploadForm(request, env);
-		} else if (method === 'GET' && (pathname === '/' || pathname === '/list')) {
-			return await handleList(request, env);
-		} else if (method === 'POST' && pathname.startsWith('/delete/')) {
+		}
+
+		// File upload (with auth)
+		if (method === 'POST' && pathname === '/upload') {
+			const authResp = await checkBasicAuth(request, env);
+			if (authResp) return authResp;
+			return await handleUpload(request, env);
+		}
+
+		// File deletion (with auth)
+		if (method === 'POST' && pathname.startsWith('/delete/')) {
+			const authResp = await checkBasicAuth(request, env);
+			if (authResp) return authResp;
 			const key = pathname.slice('/delete/'.length);
 			return await handleDelete(request, env, key);
-		} else if (method === 'GET' && pathname.startsWith('/file/')) {
+		}
+
+		// File operations (no auth required)
+		if (method === 'GET' && pathname.startsWith('/file/')) {
 			const key = pathname.slice('/file/'.length);
 			return await handleView(request, key, env);
-		} else if (method === 'GET' && pathname.startsWith('/download/')) {
+		}
+
+		if (method === 'GET' && pathname.startsWith('/download/')) {
 			const key = pathname.slice('/download/'.length);
 			return await handleDownload(key, env);
-		} else if (method === 'GET' && pathname.startsWith('/full/')) {
+		}
+
+		if (method === 'GET' && pathname.startsWith('/full/')) {
 			const key = pathname.slice('/full/'.length);
 			return await handleFull(request, key, env);
-		} else if (method === 'GET' && pathname.startsWith('/preview/')) {
+		}
+
+		if (method === 'GET' && pathname.startsWith('/preview/')) {
 			const key = pathname.slice('/preview/'.length);
 			return await handlePreview(key, env);
-		} else {
+		}
+
+		// PRIORITY 2: Static assets (CSS, JS, etc.) - but NOT HTML templates
+		// Don't serve HTML files as static assets - they should be processed by handlers above
+		if (pathname.endsWith('.html')) {
 			return new Response('Not Found', { status: 404 });
 		}
+
+		// In dev mode, proxy to Vite dev server for assets
+		if (env.VITE_DEV_URL) {
+			// For CSS files, add ?direct query param to get raw CSS instead of JS module
+			let targetPath = pathname;
+			if (pathname.endsWith('.css')) {
+				targetPath = pathname + '?direct';
+			}
+			const viteUrl = new URL(targetPath, env.VITE_DEV_URL);
+			return fetch(viteUrl.toString());
+		}
+
+		// In production, serve from ASSETS binding
+		return env.ASSETS.fetch(request);
 	},
 };
 

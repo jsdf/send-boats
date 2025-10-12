@@ -6,10 +6,15 @@ routes = [{ pattern = "send.boats", custom_domain = true }]
 compatibility_date = "2025-01-29"
 main = "src/index.ts"
 
-[[rules]]
-type = "ESModule"
-globs = ["**/*.html"]
-fallthrough = true
+[assets]
+directory = "./dist"
+binding = "ASSETS"
+
+# HTML templates should be processed by the Worker, not served as static assets
+# [[rules]]
+# type = "ESModule"
+# globs = ["**/*.html"]
+# fallthrough = true
 
 [[r2_buckets]]
 binding = "R2_BUCKET"

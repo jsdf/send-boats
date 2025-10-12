@@ -240,3 +240,7 @@ playground.xcworkspace
 *.dSYM.zip
 *.dSYM
 server/.dev.vars
+
+
+# claude
+.claude/

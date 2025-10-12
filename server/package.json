@@ -3,16 +3,26 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "deploy": "./scripts/deploy-with-version.sh",
-    "dev": "wrangler dev --ip 0.0.0.0",
+    "build": "vite build",
+    "build:watch": "vite build --watch",
+    "dev:vite": "vite --port 5173",
+    "dev:wrangler": "wrangler dev --ip 0.0.0.0 --port 8787 2>&1 | tee wrangler-dev.log",
+    "dev": "npm-run-all --parallel dev:vite dev:wrangler",
+    "preview": "npm run build && wrangler dev --ip 0.0.0.0 --var VITE_DEV_URL:",
+    "deploy": "npm run build && ./scripts/deploy-with-version.sh",
     "start": "npm run dev",
     "test": "vitest",
     "cf-typegen": "wrangler types"
   },
   "devDependencies": {
+    "@cloudflare/kv-asset-handler": "^0.4.0",
     "@cloudflare/vitest-pool-workers": "^0.6.4",
     "@cloudflare/workers-types": "^4.20250204.0",
+    "@tailwindcss/postcss": "^4.1.14",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.14",
     "typescript": "^5.5.2",
+    "vite": "^5.4.20",
     "vitest": "2.1.8",
     "wrangler": "^4.14.1"
   }

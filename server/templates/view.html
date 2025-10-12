@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8" />
+		<title>{{FILENAME}}</title>
+		{{META_TAGS}}
+		<link rel="stylesheet" href="/src/styles/main.css" />
+	</head>
+	<body class="bg-gray-50 min-h-screen">
+		<div class="max-w-4xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
+			<div class="text-center mb-6">{{MEDIA_CONTENT}}</div>
+
+			<div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+				<h2 class="text-xl font-semibold text-gray-900 mb-4">{{FILENAME}}</h2>
+				<div class="space-y-2 text-sm text-gray-600">
+					<p><strong>Type:</strong> {{FILETYPE}}</p>
+					<p><strong>Uploaded At:</strong> {{UPLOADED_AT}}</p>
+					<p><strong>Access Count:</strong> {{ACCESS_COUNT}} / 100</p>
+					<p><a href="/download/{{FILE_ID}}" class="text-blue-600 hover:underline">Download File</a></p>
+				</div>
+			</div>
+
+			<div class="text-center">
+				<a href="{{ORIGIN_URL}}/list" class="text-blue-600 hover:underline">← Back to list</a>
+			</div>
+		</div>
+	</body>
+</html>

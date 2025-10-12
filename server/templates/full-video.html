@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8" />
+		<title>A file on send.boats: {{FILENAME}}</title>
+		{{META_TAGS}}
+		<script type="module" src="/src/scripts/full-video.ts"></script>
+		<link rel="stylesheet" href="/src/styles/full-screen.css" />
+	</head>
+	<body>
+		<video id="fullscreen-video" controls loop autoplay>
+			<source src="/download/{{FILE_ID}}" type="{{FILETYPE}}" />
+			Your browser does not support the video tag.
+		</video>
+	</body>
+</html>
