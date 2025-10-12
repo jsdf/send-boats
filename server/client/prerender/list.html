@@ -8,26 +8,21 @@
 	</head>
 	<body class="bg-base-200 min-h-screen">
 		<div class="max-w-4xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
-			<h1 class="text-2xl sm:text-3xl font-bold mb-6">Uploaded Files</h1>
+			<h1 class="text-2xl sm:text-3xl font-bold mb-2">Uploaded Files</h1>
 
-			<div class="space-y-3">
-				{{FILE_LIST}}
+			<div class="space-y-2 mb-4">
+				<p>
+					<a href="/upload-form" class="link link-primary"> Upload a new file </a>
+				</p>
 			</div>
+
+			<div class="space-y-3">{{FILE_LIST}}</div>
 
 			{{PAGINATION}}
 
-			<div class="divider"></div>
+			<div class="divider mt-2"></div>
 
-			<div class="space-y-2">
-				<p>
-					<a href="/upload-form" class="link link-primary">
-						Upload a new file
-					</a>
-				</p>
-				<p class="text-xs opacity-60">
-					Version: {{VERSION_INFO}}
-				</p>
-			</div>
+			<p class="text-xs opacity-60">Version: {{VERSION_INFO}}</p>
 		</div>
 	</body>
 </html>

@@ -1,2 +1,5 @@
 @import 'tailwindcss';
 @plugin 'daisyui';
+
+/* Scan TypeScript handlers that contain dynamic HTML templates */
+@source '../../../src/handlers/**/*.ts';

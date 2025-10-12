@@ -53,8 +53,6 @@ async function checkSessionAuth(request: Request, env: Env): Promise<Response | 
 	const cookie = request.headers.get('Cookie');
 	let sessionToken: string | null = null;
 
-	console.log('checkSessionAuth - Cookie header:', cookie);
-
 	if (cookie) {
 		const sessionMatch = cookie.match(/session=([^;]+)/);
 		if (sessionMatch) {
@@ -62,36 +60,30 @@ async function checkSessionAuth(request: Request, env: Env): Promise<Response | 
 		}
 	}
 
-	console.log('checkSessionAuth - Session token found:', !!sessionToken);
-
 	if (!sessionToken) {
-		console.log('checkSessionAuth - No session token, redirecting to login');
 		return redirectToLogin(request);
 	}
 
 	// Validate session token
 	try {
 		const sessionData = await env.RATE_LIMIT.get(`session:${sessionToken}`);
-		console.log('checkSessionAuth - Session data from KV:', !!sessionData);
 
 		if (!sessionData) {
-			console.log('checkSessionAuth - No session data in KV, redirecting to login');
 			return redirectToLogin(request);
 		}
 
 		const session = JSON.parse(sessionData);
 		const isExpired = session.expiresAt < Date.now();
-		console.log('checkSessionAuth - Session expired?', isExpired);
 
 		if (isExpired) {
 			// Session expired, clean it up
 			await env.RATE_LIMIT.delete(`session:${sessionToken}`);
-			console.log('checkSessionAuth - Session expired, redirecting to login');
+
 			return redirectToLogin(request);
 		}
 
 		// Session is valid
-		console.log('checkSessionAuth - Session valid, allowing access');
+
 		return null;
 	} catch (error) {
 		console.error('Session validation error:', error);
