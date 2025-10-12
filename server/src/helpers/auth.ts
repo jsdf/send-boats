@@ -121,7 +121,7 @@ function redirectToLogin(request: Request): Response {
 	return new Response('', {
 		status: 302,
 		headers: {
-			Location: '/login',
+			Location: '/looking-glass',
 		},
 	});
 }

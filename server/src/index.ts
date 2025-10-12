@@ -25,43 +25,12 @@ export default {
 		// PRIORITY 1: Handle dynamic routes FIRST to preempt asset serving
 
 		// Authentication routes (no auth required)
-		if (pathname === '/login') {
+		if (pathname === '/looking-glass') {
 			return await handleLogin(request, env);
 		}
 
 		if (pathname === '/logout') {
 			return await handleLogout(request, env);
-		}
-
-		// Debug endpoint (remove in production)
-		if (pathname === '/debug-auth' && method === 'GET') {
-			return new Response(
-				JSON.stringify({
-					hasUsername: !!env.BASIC_AUTH_USERNAME,
-					hasPassword: !!env.BASIC_AUTH_PASSWORD,
-					usernameLength: env.BASIC_AUTH_USERNAME?.length || 0,
-				}),
-				{
-					headers: { 'Content-Type': 'application/json' },
-				}
-			);
-		}
-
-		// Test cookie endpoint
-		if (pathname === '/test-cookie' && method === 'GET') {
-			const cookie = request.headers.get('Cookie');
-			return new Response(
-				JSON.stringify({
-					hasCookie: !!cookie,
-					cookieValue: cookie,
-				}),
-				{
-					headers: {
-						'Content-Type': 'application/json',
-						'Set-Cookie': 'test=123; HttpOnly; SameSite=Strict; Max-Age=3600; Path=/',
-					},
-				}
-			);
 		}
 
 		// Server-rendered page routes (with auth)

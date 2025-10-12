@@ -21,7 +21,7 @@ Always reference these instructions first and fallback to search or bash command
 ### Authentication System
 
 - **Web Interface**: Uses cookie-based authentication
-  - Login page at `/login` with credentials from `.dev.vars`
+  - Login page at `/looking-glass` with credentials from `.dev.vars`
   - Sessions stored in KV with 24-hour expiration
   - Logout at `/logout`
 - **iOS App**: Uses HTTP basic authentication (same credentials)
@@ -30,11 +30,11 @@ Always reference these instructions first and fallback to search or bash command
 
 ### Test Server Functionality
 
-- **Web browser**: Navigate to http://127.0.0.1:8787/, log in with `admin`/`password`
+- **Web browser**: Navigate to http://127.0.0.1:8787/, log in with `admin`/`password` at `/looking-glass`
 - **Basic auth (iOS/curl)**: `curl -u "admin:password" http://127.0.0.1:8787/`
 - Upload form: Access via web after login or `curl -u "admin:password" http://127.0.0.1:8787/upload-form`
 - File list: Access via web after login or `curl -u "admin:password" http://127.0.0.1:8787/`
-- Without auth, web users redirected to login, API clients get 401 Unauthorized
+- Without auth, web users redirected to `/looking-glass`, API clients get 401 Unauthorized
 
 ### iOS Component
 

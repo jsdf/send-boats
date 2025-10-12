@@ -125,7 +125,7 @@ export async function handleLogout(request: Request, env: Env): Promise<Response
 	return new Response('', {
 		status: 302,
 		headers: {
-			Location: '/login',
+			Location: '/looking-glass',
 			'Set-Cookie': cookieOptions,
 		},
 	});

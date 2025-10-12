@@ -8,17 +8,25 @@ import { Env } from '../types';
  * even though the server is actually running on localhost. This function uses the Host
  * header to get the actual hostname being accessed.
  *
+ * In preview mode (deployed previews), the Host header is also set to the production
+ * domain. To override this, set the PREVIEW_ORIGIN environment variable to the actual
+ * preview URL (e.g., "https://abc123.send-server.workers.dev").
+ *
  * @param request The incoming request
  * @param env Environment bindings
  * @returns The correct origin URL (e.g., "http://127.0.0.1:8787" or "https://send.boats")
  */
 export function getOriginUrl(request: Request, env: Env): string {
-	// If DEV_ORIGIN is explicitly set, use it
+	// If DEV_ORIGIN is explicitly set (for local dev), use it
 	if (env.DEV_ORIGIN) {
+		console.log('Using DEV_ORIGIN from environment:', env.DEV_ORIGIN);
 		return env.DEV_ORIGIN;
 	}
 
 	// Get the Host header which has the actual hostname being accessed
+	// In local dev: Host = "127.0.0.1:8787" (correct)
+	// In preview: Host = "send.boats" (wrong - set PREVIEW_ORIGIN env var instead)
+	// In production: Host = "send.boats" (correct)
 	const host = request.headers.get('Host');
 	if (!host) {
 		// Fallback to request.url origin if no Host header (shouldn't happen)

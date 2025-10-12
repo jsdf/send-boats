@@ -9,7 +9,7 @@ export interface Env {
 	BASIC_AUTH_USERNAME: string;
 	BASIC_AUTH_PASSWORD: string;
 	VITE_DEV_URL?: string; // URL of Vite dev server (development only)
-	DEV_ORIGIN?: string; // Origin URL for dev mode (development only)
+	DEV_ORIGIN?: string; // Origin URL override for dev/preview mode (e.g., "http://0.0.0.0:8787")
 	GIT_SHA?: string; // Current git commit SHA
 	GIT_DIRTY?: string; // "true" if there are uncommitted changes
 }
