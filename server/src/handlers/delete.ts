@@ -1,6 +1,7 @@
 import { Env, UploadRecord } from '../types';
 
 import { checkBasicAuth } from '../helpers/auth';
+import { buildUrl } from '../helpers/url';
 
 export async function handleDelete(request: Request, env: Env, key: string): Promise<Response> {
 	// Protect deletion with HTTP Basic Auth.
@@ -21,6 +22,7 @@ export async function handleDelete(request: Request, env: Env, key: string): Pro
 		await env.R2_BUCKET.delete(`${key}-preview`);
 	}
 
-	// Optionally: signal the Durable Object to clear its counter.
-	return new Response('File deleted successfully', { status: 200 });
+	// Redirect back to the list page
+	const listUrl = buildUrl('/', request, env);
+	return Response.redirect(listUrl, 303);
 }
