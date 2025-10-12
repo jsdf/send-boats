@@ -2,8 +2,6 @@
 import { Env, UploadRecord } from '../types';
 
 export async function handlePreview(key: string, env: Env): Promise<Response> {
-	console.log(`Preview requested for key: ${key}`);
-
 	// First, look up the file record
 	const record: UploadRecord | null = await env.DB.prepare('SELECT * FROM uploads WHERE id = ?').bind(key).first();
 
@@ -11,8 +9,6 @@ export async function handlePreview(key: string, env: Env): Promise<Response> {
 		console.log(`No record found for key: ${key}`);
 		return new Response('File record not found', { status: 404 });
 	}
-
-	console.log(`Record found: ${JSON.stringify(record)}`);
 
 	// Check if this file has a preview
 	if (!record.has_preview) {
@@ -23,7 +19,6 @@ export async function handlePreview(key: string, env: Env): Promise<Response> {
 
 	// Retrieve the preview from R2
 	const previewKey = `${key}-preview`;
-	console.log(`Fetching preview from R2 with key: ${previewKey}`);
 	const object = await env.R2_BUCKET.get(previewKey);
 
 	if (!object) {
@@ -31,7 +26,6 @@ export async function handlePreview(key: string, env: Env): Promise<Response> {
 		return new Response('Preview not found in storage', { status: 404 });
 	}
 
-	console.log(`Preview found, size: ${object.size} bytes, type: ${object.httpMetadata?.contentType}`);
 	return new Response(object.body, {
 		headers: {
 			'Content-Type': 'image/jpeg',

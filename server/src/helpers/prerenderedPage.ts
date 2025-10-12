@@ -11,11 +11,8 @@ function getPrerenderedPageFilename(prerenderedPageName: string): string {
 async function fetchPrerenderedPage(prerenderedPageName: string, env: Env): Promise<string> {
 	const filename = getPrerenderedPageFilename(prerenderedPageName);
 
-	console.log(`Fetching prerenderedPage: ${filename}`);
-
 	// In dev mode, fetch from Vite dev server for hot reloading
 	if (env.VITE_DEV_URL) {
-		console.log(`Fetching prerenderedPage from Vite dev server at ${env.VITE_DEV_URL}/${filename}`);
 		const response = await fetch(`${env.VITE_DEV_URL}/${filename}`);
 		if (!response.ok) {
 			throw new Error(`Failed to fetch prerenderedPage from Vite dev server: ${response.statusText}`);

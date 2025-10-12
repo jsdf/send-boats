@@ -19,7 +19,6 @@ import { Env } from '../types';
 export function getOriginUrl(request: Request, env: Env): string {
 	// If DEV_ORIGIN is explicitly set (for local dev), use it
 	if (env.DEV_ORIGIN) {
-		console.log('Using DEV_ORIGIN from environment:', env.DEV_ORIGIN);
 		return env.DEV_ORIGIN;
 	}
 
