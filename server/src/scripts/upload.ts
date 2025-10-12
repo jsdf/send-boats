@@ -32,7 +32,7 @@ fileInput.addEventListener('change', async (e) => {
 		frames.forEach((frame, index) => {
 			const previewOption = document.createElement('div');
 			previewOption.className = `relative cursor-pointer border-2 rounded-lg overflow-hidden transition-all ${
-				index === 0 ? 'border-blue-500 ring-2 ring-blue-200' : 'border-transparent hover:border-gray-300'
+				index === 0 ? 'border-primary ring-2 ring-primary ring-opacity-30' : 'border-transparent hover:border-base-content hover:border-opacity-20'
 			}`;
 
 			const img = document.createElement('img');
@@ -40,7 +40,7 @@ fileInput.addEventListener('change', async (e) => {
 			img.className = 'w-full h-auto object-cover';
 
 			const timestamp = document.createElement('div');
-			timestamp.className = 'absolute bottom-0 right-0 bg-black bg-opacity-75 text-white px-2 py-1 text-xs rounded-tl';
+			timestamp.className = 'absolute bottom-0 right-0 bg-base-300 bg-opacity-90 px-2 py-1 text-xs rounded-tl';
 			timestamp.textContent = formatTime(frame.timestamp);
 
 			previewOption.appendChild(img);
@@ -50,9 +50,9 @@ fileInput.addEventListener('change', async (e) => {
 			// Select this preview when clicked
 			previewOption.addEventListener('click', () => {
 				document.querySelectorAll('#previewContainer > div').forEach((el) => {
-					el.className = el.className.replace('border-blue-500 ring-2 ring-blue-200', 'border-transparent');
+					el.className = el.className.replace('border-primary ring-2 ring-primary ring-opacity-30', 'border-transparent');
 				});
-				previewOption.className = previewOption.className.replace('border-transparent', 'border-blue-500 ring-2 ring-blue-200');
+				previewOption.className = previewOption.className.replace('border-transparent', 'border-primary ring-2 ring-primary ring-opacity-30');
 				selectedPreviewBlob = frame.blob;
 			});
 

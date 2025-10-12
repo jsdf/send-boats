@@ -1,3 +1,6 @@
+@import 'tailwindcss';
+@plugin 'daisyui';
+
 /* Full-screen styles */
 * {
 	margin: 0;
@@ -37,7 +40,7 @@ body.image-viewer img {
 
 /* Audio player */
 body.audio-player {
-	background: #f0f0f0;
+	background: oklch(var(--b2));
 	display: flex;
 	justify-content: center;
 	align-items: center;

@@ -9,19 +9,19 @@ export async function handleList(request: Request, env: Env): Promise<Response> 
 
 		let listHtml = '';
 		if (files.length === 0) {
-			listHtml = `<p class="text-gray-600">No files uploaded yet.</p>`;
+			listHtml = `<p class="opacity-60">No files uploaded yet.</p>`;
 		} else {
 			for (const file of files) {
 				// Determine if we should show a preview thumbnail and link
 				const hasPreview = file.filetype.startsWith('video/') && file.has_preview;
 				const previewLink = hasPreview
-					? `<a href="/preview/${file.id}" target="_blank" class="text-blue-600 hover:underline">Preview</a> | `
+					? `<a href="/preview/${file.id}" target="_blank" class="link link-primary">Preview</a> | `
 					: '';
 
 				// Add thumbnail for videos with previews
 				const thumbnailHtml = hasPreview
 					? `<div class="flex-shrink-0 w-full sm:w-32">
-							<img src="/preview/${file.id}" alt="Preview" class="w-full h-auto sm:h-18 object-cover rounded-lg border border-gray-200" />
+							<img src="/preview/${file.id}" alt="Preview" class="w-full h-auto sm:h-18 object-cover rounded-lg border border-base-300" />
 						</div>`
 					: '';
 
@@ -40,21 +40,21 @@ export async function handleList(request: Request, env: Env): Promise<Response> 
 					);
 
 				listHtml += `
-					<div class="bg-white rounded-lg shadow-sm p-4 ${hasPreview ? 'sm:flex sm:gap-4' : ''}">
+					<div class="card bg-base-100 shadow-sm p-4 ${hasPreview ? 'sm:flex sm:gap-4' : ''}">
 						${thumbnailHtml}
 						<div class="flex-grow ${hasPreview ? 'mt-3 sm:mt-0' : ''}">
-							<div class="font-semibold text-gray-900 mb-2 break-words">${escapeHtml(file.filename)}</div>
-							<div class="text-sm text-gray-600 space-y-1">
+							<div class="font-semibold mb-2 break-words">${escapeHtml(file.filename)}</div>
+							<div class="text-sm opacity-70 space-y-1">
 								<div class="flex flex-wrap gap-2 items-center">
 									${previewLink}
-									<a href="/file/${file.id}" class="text-blue-600 hover:underline">View</a> |
-									<a href="/full/${file.id}" class="text-blue-600 hover:underline">Full</a>
+									<a href="/file/${file.id}" class="link link-primary">View</a> |
+									<a href="/full/${file.id}" class="link link-primary">Full</a>
 								</div>
-								<div class="text-xs text-gray-500">Uploaded: ${file.uploaded_at}</div>
+								<div class="text-xs opacity-60">Uploaded: ${file.uploaded_at}</div>
 								<form method="POST" action="/delete/${
 									file.id
 								}" class="inline-block" onsubmit="return confirm('Are you sure you want to delete this file?');">
-									<button type="submit" class="text-xs px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition-colors">Delete</button>
+									<button type="submit" class="btn btn-error btn-xs">Delete</button>
 								</form>
 							</div>
 						</div>

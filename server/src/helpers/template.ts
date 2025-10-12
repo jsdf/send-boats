@@ -9,6 +9,7 @@ const templateFiles: Record<string, string> = {
 	'full-video': 'templates/full-video.html',
 	'full-image': 'templates/full-image.html',
 	'full-audio': 'templates/full-audio.html',
+	login: 'templates/login.html',
 };
 
 /**

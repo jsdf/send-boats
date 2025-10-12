@@ -2,6 +2,7 @@
 import { Env, UploadRecord } from '../types';
 import { generateMetaTags } from '../helpers/meta';
 import { renderTemplate } from '../helpers/template';
+import { buildUrl, getOriginUrl } from '../helpers/url';
 
 export async function handleView(request: Request, key: string, env: Env): Promise<Response> {
 	const record: UploadRecord | null = await env.DB.prepare('SELECT * FROM uploads WHERE id = ?').bind(key).first();
@@ -30,15 +31,11 @@ export async function handleView(request: Request, key: string, env: Env): Promi
                       Your browser does not support the audio element.
                     </audio>`;
 	} else {
-		mediaContent = `<p class="text-gray-600">This file type cannot be previewed inline.</p>`;
+		mediaContent = `<p class="opacity-60">This file type cannot be previewed inline.</p>`;
 	}
 
 	// Use the request URL for generating meta tags
 	const metaTags = generateMetaTags(record, key, request.url);
-
-	// In dev mode, Wrangler rewrites request.url to use the routes config domain
-	// Use DEV_ORIGIN env var if set, otherwise fall back to request.url origin
-	const originUrl = env.DEV_ORIGIN || new URL(request.url).origin;
 
 	// Escape HTML in filename for safety
 	const escapeHtml = (text: string) =>
@@ -54,6 +51,10 @@ export async function handleView(request: Request, key: string, env: Env): Promi
 				}[m] || m)
 		);
 
+	// Build full URLs using correct origin
+	const downloadUrl = buildUrl(`/download/${key}`, request, env);
+	const originUrl = getOriginUrl(request, env);
+
 	const html = await renderTemplate(
 		'view',
 		{
@@ -63,7 +64,7 @@ export async function handleView(request: Request, key: string, env: Env): Promi
 			FILETYPE: escapeHtml(record.filetype),
 			UPLOADED_AT: record.uploaded_at,
 			ACCESS_COUNT: count.toString(),
-			FILE_ID: key,
+			DOWNLOAD_URL: downloadUrl,
 			ORIGIN_URL: originUrl,
 		},
 		env

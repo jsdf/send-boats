@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Login - send.boats</title>
+		<link rel="stylesheet" href="/src/styles/main.css" />
+	</head>
+	<body class="bg-base-200 min-h-screen flex items-center justify-center">
+		<div class="card w-full max-w-md bg-base-100 shadow-xl">
+			<div class="card-body">
+				<div class="text-center mb-4">
+					<h1 class="text-3xl font-bold">🚢 send.boats</h1>
+				</div>
+
+				{{error}}
+
+				<form method="POST" action="/login" class="space-y-4">
+					<div class="form-control">
+						<label for="username" class="label">
+							<span class="label-text">Username</span>
+						</label>
+						<input
+							type="text"
+							id="username"
+							name="username"
+							required
+							autocomplete="username"
+							class="input input-bordered w-full"
+						/>
+					</div>
+
+					<div class="form-control">
+						<label for="password" class="label">
+							<span class="label-text">Password</span>
+						</label>
+						<input
+							type="password"
+							id="password"
+							name="password"
+							required
+							autocomplete="current-password"
+							class="input input-bordered w-full"
+						/>
+					</div>
+
+					<button type="submit" class="btn btn-primary w-full">
+						Login
+					</button>
+				</form>
+			</div>
+		</div>
+	</body>
+</html>

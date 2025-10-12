@@ -8,7 +8,8 @@ import { handleFull } from './handlers/full';
 import { handleDelete } from './handlers/delete';
 import { handlePreview } from './handlers/preview';
 import { Env } from './types';
-import { checkBasicAuth } from './helpers/auth';
+import { checkAuth } from './helpers/auth';
+import { handleLogin, handleLogout } from './handlers/login';
 import { checkRateLimit } from './helpers/rateLimit';
 
 export default {
@@ -23,29 +24,69 @@ export default {
 
 		// PRIORITY 1: Handle dynamic routes FIRST to preempt asset serving
 
+		// Authentication routes (no auth required)
+		if (pathname === '/login') {
+			return await handleLogin(request, env);
+		}
+
+		if (pathname === '/logout') {
+			return await handleLogout(request, env);
+		}
+
+		// Debug endpoint (remove in production)
+		if (pathname === '/debug-auth' && method === 'GET') {
+			return new Response(
+				JSON.stringify({
+					hasUsername: !!env.BASIC_AUTH_USERNAME,
+					hasPassword: !!env.BASIC_AUTH_PASSWORD,
+					usernameLength: env.BASIC_AUTH_USERNAME?.length || 0,
+				}),
+				{
+					headers: { 'Content-Type': 'application/json' },
+				}
+			);
+		}
+
+		// Test cookie endpoint
+		if (pathname === '/test-cookie' && method === 'GET') {
+			const cookie = request.headers.get('Cookie');
+			return new Response(
+				JSON.stringify({
+					hasCookie: !!cookie,
+					cookieValue: cookie,
+				}),
+				{
+					headers: {
+						'Content-Type': 'application/json',
+						'Set-Cookie': 'test=123; HttpOnly; SameSite=Strict; Max-Age=3600; Path=/',
+					},
+				}
+			);
+		}
+
 		// Server-rendered page routes (with auth)
 		if (method === 'GET' && (pathname === '/' || pathname === '/list')) {
-			const authResp = await checkBasicAuth(request, env);
+			const authResp = await checkAuth(request, env);
 			if (authResp) return authResp;
 			return await handleList(request, env);
 		}
 
 		if (method === 'GET' && pathname === '/upload-form') {
-			const authResp = await checkBasicAuth(request, env);
+			const authResp = await checkAuth(request, env);
 			if (authResp) return authResp;
 			return await handleUploadForm(request, env);
 		}
 
 		// File upload (with auth)
 		if (method === 'POST' && pathname === '/upload') {
-			const authResp = await checkBasicAuth(request, env);
+			const authResp = await checkAuth(request, env);
 			if (authResp) return authResp;
 			return await handleUpload(request, env);
 		}
 
 		// File deletion (with auth)
 		if (method === 'POST' && pathname.startsWith('/delete/')) {
-			const authResp = await checkBasicAuth(request, env);
+			const authResp = await checkAuth(request, env);
 			if (authResp) return authResp;
 			const key = pathname.slice('/delete/'.length);
 			return await handleDelete(request, env, key);

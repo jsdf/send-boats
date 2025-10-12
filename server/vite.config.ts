@@ -47,6 +47,7 @@ export default defineConfig(({ mode }) => ({
 				'templates/full-video': resolve(__dirname, 'templates/full-video.html'),
 				'templates/full-image': resolve(__dirname, 'templates/full-image.html'),
 				'templates/full-audio': resolve(__dirname, 'templates/full-audio.html'),
+				'templates/login': resolve(__dirname, 'templates/login.html'),
 			},
 		},
 		outDir: 'dist',

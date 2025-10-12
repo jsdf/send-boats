@@ -35,3 +35,13 @@ id = "36cc60cc6ee049ab8c03857ba0044766"
 [[migrations]]
 tag = "v1"                      # A unique migration tag
 new_classes = ["AccessCounter"]
+
+
+[observability]
+enabled = false
+
+
+[observability.logs]
+enabled = true
+head_sampling_rate = 1
+invocation_logs = true

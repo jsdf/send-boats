@@ -2,6 +2,7 @@
 import { Env, UploadRecord } from '../types';
 import { generateMetaTags } from '../helpers/meta';
 import { renderTemplate } from '../helpers/template';
+import { buildUrl } from '../helpers/url';
 
 export async function handleFull(request: Request, key: string, env: Env): Promise<Response> {
 	const record: UploadRecord | null = await env.DB.prepare('SELECT * FROM uploads WHERE id = ?').bind(key).first();
@@ -28,6 +29,7 @@ export async function handleFull(request: Request, key: string, env: Env): Promi
 		);
 
 	let html: string;
+	const downloadUrl = buildUrl(`/download/${key}`, request, env);
 
 	if (record.filetype.startsWith('video/')) {
 		html = await renderTemplate(
@@ -35,7 +37,7 @@ export async function handleFull(request: Request, key: string, env: Env): Promi
 			{
 				FILENAME: escapeHtml(record.filename),
 				META_TAGS: metaTags,
-				FILE_ID: key,
+				DOWNLOAD_URL: downloadUrl,
 				FILETYPE: record.filetype,
 			},
 			env
@@ -46,7 +48,7 @@ export async function handleFull(request: Request, key: string, env: Env): Promi
 			{
 				FILENAME: escapeHtml(record.filename),
 				META_TAGS: metaTags,
-				FILE_ID: key,
+				DOWNLOAD_URL: downloadUrl,
 			},
 			env
 		);
@@ -56,7 +58,7 @@ export async function handleFull(request: Request, key: string, env: Env): Promi
 			{
 				FILENAME: escapeHtml(record.filename),
 				META_TAGS: metaTags,
-				FILE_ID: key,
+				DOWNLOAD_URL: downloadUrl,
 				FILETYPE: record.filetype,
 			},
 			env

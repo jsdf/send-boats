@@ -84,6 +84,74 @@ fileSelection → previewAndUpload → uploading → success
 - **KV** - Rate limiting storage
 - **Durable Objects** - Access counting
 
+**Rendering Pipeline:**
+
+The server uses a two-phase rendering system:
+
+1. **Static Compilation (Vite Build)**
+   - HTML templates in `server/templates/*.html` are processed by Vite
+   - CSS compiled with Tailwind/PostCSS and bundled
+   - Built assets output to `server/dist/`
+   - Templates preserve placeholder variables: `{{FILENAME}}`, `{{FILE_ID}}`, `{{META_TAGS}}`
+
+2. **Dynamic Injection (Cloudflare Worker Runtime)**
+   - Worker intercepts route requests before serving static assets
+   - Handlers fetch pre-compiled templates from `env.ASSETS` (prod) or Vite dev server (dev)
+   - `renderTemplate()` performs string substitution on placeholders with dynamic data
+   - Fully-rendered HTML returned to client
+
+**URL Resolution in Development vs Production:**
+
+Critical difference affects how links work:
+
+- **Development Mode** (`npm run dev` starts both Vite on :5173 and Wrangler on :8787):
+  - Vite's `absoluteUrlPlugin` transforms asset URLs to absolute: `http://localhost:5173/...`
+  - Example: `<link href="/src/styles/full-screen.css">` → `<link href="http://localhost:5173/src/styles/full-screen.css">`
+  - Enables hot reloading across different ports
+  - **Only affects**: `<link href="...css">`, `<script src="...">`, `<img src="...">`
+  - **Does NOT affect**: Navigation links like `<a href="/download/{{FILE_ID}}">` or API endpoints
+  - Navigation links remain relative and resolve through the worker on port 8787
+
+- **Production**:
+  - All URLs relative
+  - Single origin serves everything
+  - No URL transformation
+
+**Template Development Guidelines:**
+- Use relative URLs for all navigation and API calls: `/download/{{FILE_ID}}`
+- Never hardcode absolute URLs or base paths
+- Asset links (CSS/JS) are automatically handled by Vite per environment
+- Worker blocks direct `.html` access; templates only served through handlers with data injection
+- **CRITICAL**: Always use `buildUrl(path, request, env)` or `getOriginUrl(request, env)` from `src/helpers/url.ts` instead of `new URL(path, request.url)` because `request.url` contains the production hostname even in dev mode
+
+**IMPORTANT: Image/Media Sources Pointing to Worker Routes**
+
+When an `<img>` or `<video>` source points to a worker route (not a static asset), you must build the full URL in the worker and template it in:
+
+❌ **BROKEN** - Relative path in `<img src>` pointing to worker route:
+```html
+<!-- full-image.html - BROKEN IN DEV -->
+<img src="/download/{{FILE_ID}}" alt="{{FILENAME}}" />
+```
+Problem: Vite's plugin rewrites to `http://localhost:5173/download/...` (port 5173), but the download handler is on the worker (port 8787). Results in 404.
+
+✅ **CORRECT** - Worker builds full URL using helper:
+```typescript
+// In handler (full.ts):
+import { buildUrl } from '../helpers/url';
+
+const downloadUrl = buildUrl(`/download/${key}`, request, env);
+html = await renderTemplate('full-image', {
+  DOWNLOAD_URL: downloadUrl,  // e.g., "http://127.0.0.1:8787/download/abc123"
+  FILENAME: escapeHtml(record.filename),
+}, env);
+```
+```html
+<!-- Template: -->
+<img src="{{DOWNLOAD_URL}}" alt="{{FILENAME}}" />
+```
+Result: The `buildUrl()` helper uses the `Host` header to get the correct hostname (127.0.0.1:8787 in dev, send.boats in prod). Vite plugin ignores already-absolute URLs. Works in both dev and production.
+
 ## Testing Framework
 
 **iOS Testing:**

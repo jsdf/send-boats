@@ -1,7 +1,18 @@
 // src/helpers/auth.ts
 import { Env } from '../types';
 
-export async function checkBasicAuth(request: Request, env: Env): Promise<Response | null> {
+export async function checkAuth(request: Request, env: Env): Promise<Response | null> {
+	// First check if there's a basic auth header (for iOS app)
+	const authHeader = request.headers.get('Authorization');
+	if (authHeader) {
+		return await validateBasicAuth(request, env);
+	}
+
+	// If no basic auth, check for session cookie (for web interface)
+	return await checkSessionAuth(request, env);
+}
+
+async function validateBasicAuth(request: Request, env: Env): Promise<Response | null> {
 	const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
 	const authKey = 'auth:' + ip;
 	const failCountStr = await env.RATE_LIMIT.get(authKey);
@@ -35,4 +46,87 @@ export async function checkBasicAuth(request: Request, env: Env): Promise<Respon
 	}
 
 	return null;
+}
+
+async function checkSessionAuth(request: Request, env: Env): Promise<Response | null> {
+	// Get session token from cookie
+	const cookie = request.headers.get('Cookie');
+	let sessionToken: string | null = null;
+
+	console.log('checkSessionAuth - Cookie header:', cookie);
+
+	if (cookie) {
+		const sessionMatch = cookie.match(/session=([^;]+)/);
+		if (sessionMatch) {
+			sessionToken = sessionMatch[1];
+		}
+	}
+
+	console.log('checkSessionAuth - Session token found:', !!sessionToken);
+
+	if (!sessionToken) {
+		console.log('checkSessionAuth - No session token, redirecting to login');
+		return redirectToLogin(request);
+	}
+
+	// Validate session token
+	try {
+		const sessionData = await env.RATE_LIMIT.get(`session:${sessionToken}`);
+		console.log('checkSessionAuth - Session data from KV:', !!sessionData);
+
+		if (!sessionData) {
+			console.log('checkSessionAuth - No session data in KV, redirecting to login');
+			return redirectToLogin(request);
+		}
+
+		const session = JSON.parse(sessionData);
+		const isExpired = session.expiresAt < Date.now();
+		console.log('checkSessionAuth - Session expired?', isExpired);
+
+		if (isExpired) {
+			// Session expired, clean it up
+			await env.RATE_LIMIT.delete(`session:${sessionToken}`);
+			console.log('checkSessionAuth - Session expired, redirecting to login');
+			return redirectToLogin(request);
+		}
+
+		// Session is valid
+		console.log('checkSessionAuth - Session valid, allowing access');
+		return null;
+	} catch (error) {
+		console.error('Session validation error:', error);
+		return redirectToLogin(request);
+	}
+}
+
+function redirectToLogin(request: Request): Response {
+	// Check if this is an API request (has Accept: application/json or similar)
+	const acceptHeader = request.headers.get('Accept');
+	const userAgent = request.headers.get('User-Agent');
+
+	// If it's clearly an API request, return 401 instead of redirect
+	if (
+		acceptHeader?.includes('application/json') ||
+		userAgent?.includes('APIClient') ||
+		userAgent?.includes('curl') ||
+		userAgent?.includes('wget')
+	) {
+		return new Response('Unauthorized', {
+			status: 401,
+			headers: { 'WWW-Authenticate': 'Cookie realm="Secure Area"' },
+		});
+	}
+
+	// For browser requests, redirect to login page
+	return new Response('', {
+		status: 302,
+		headers: {
+			Location: '/login',
+		},
+	});
+}
+
+// Keep the original function for backward compatibility, but mark it as deprecated
+export async function checkBasicAuth(request: Request, env: Env): Promise<Response | null> {
+	return await checkAuth(request, env);
 }
