@@ -35,7 +35,10 @@ export async function handleView(request: Request, key: string, env: Env): Promi
 
 	// Use the request URL for generating meta tags
 	const metaTags = generateMetaTags(record, key, request.url);
-	const originUrl = new URL(request.url).origin;
+
+	// In dev mode, Wrangler rewrites request.url to use the routes config domain
+	// Use DEV_ORIGIN env var if set, otherwise fall back to request.url origin
+	const originUrl = env.DEV_ORIGIN || new URL(request.url).origin;
 
 	// Escape HTML in filename for safety
 	const escapeHtml = (text: string) =>

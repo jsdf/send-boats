@@ -6,7 +6,7 @@
     "build": "vite build",
     "build:watch": "vite build --watch",
     "dev:vite": "vite --port 5173",
-    "dev:wrangler": "wrangler dev --ip 0.0.0.0 --port 8787 2>&1 | tee wrangler-dev.log",
+    "dev:wrangler": "wrangler dev --ip 0.0.0.0 --port 8787 --var DEV_ORIGIN:http://0.0.0.0:8787 2>&1 | tee wrangler-dev.log",
     "dev": "npm-run-all --parallel dev:vite dev:wrangler",
     "preview": "npm run build && wrangler dev --ip 0.0.0.0 --var VITE_DEV_URL:",
     "deploy": "npm run build && ./scripts/deploy-with-version.sh",
